@@ -12,6 +12,7 @@ import {
   BarChart3,
   Share2,
   Activity,
+  ShieldAlert,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "../ui/Button";
@@ -58,6 +59,7 @@ export function Sidebar() {
     },
     { href: "/admin/users", label: "Users", icon: Users, roles: ["ADMIN"] },
     { href: "/admin/audit", label: "Audit", icon: FileText, roles: ["ADMIN"] },
+    { href: "/admin/escalations", label: "Escalations", icon: ShieldAlert, roles: ["ADMIN"] },
     {
       href: "/shared-goals",
       label: "Shared Goals",

@@ -1,165 +1,331 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginSchema, LoginInput } from "@/lib/validations";
-import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Card, CardBody } from "@/components/ui/Card";
-import { Copy, CheckCircle2, ShieldCheck, Briefcase, UserCircle } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { AlertCircle, X, ChevronRight, Loader2, CheckCircle2 } from "lucide-react";
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface SSOUser {
+  id: string;
+  name: string;
+  email: string;
+  role: "ADMIN" | "MANAGER" | "EMPLOYEE";
+  aadGroup: string;
+  department: string;
+  initials: string;
+  avatarColor: string;
+  reportsTo: { name: string; email: string } | null;
+  directReports: number;
+}
+
+const ROLE_ROUTE: Record<string, string> = {
+  ADMIN: "/admin",
+  MANAGER: "/manager",
+  EMPLOYEE: "/employee",
+};
+
+const ROLE_STYLES: Record<string, { bg: string; text: string; label: string }> = {
+  ADMIN:    { bg: "bg-violet-100", text: "text-violet-700", label: "Admin" },
+  MANAGER:  { bg: "bg-blue-100",   text: "text-blue-700",   label: "Manager" },
+  EMPLOYEE: { bg: "bg-emerald-100",text: "text-emerald-700",label: "Employee" },
+};
+
+// ─── Account Picker Modal ─────────────────────────────────────────────────────
+function AccountPicker({
+  onClose,
+  onPick,
+}: {
+  onClose: () => void;
+  onPick: (user: SSOUser) => void;
+}) {
+  const [users, setUsers] = useState<SSOUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch("/api/sso-directory")
+      .then((r) => r.json())
+      .then((d) => { setUsers(Array.isArray(d) ? d : []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  // Close on backdrop click
+  const handleBackdrop = (e: React.MouseEvent) => {
+    if (e.target === overlayRef.current) onClose();
+  };
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  return (
+    <div
+      ref={overlayRef}
+      onClick={handleBackdrop}
+      className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4"
+    >
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-200 w-full max-w-md overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-2.5">
+            {/* Microsoft logo */}
+            <div className="grid grid-cols-2 gap-0.5 w-5 h-5 flex-shrink-0">
+              <div className="bg-[#f25022] rounded-[1px]" />
+              <div className="bg-[#7fba00] rounded-[1px]" />
+              <div className="bg-[#00a4ef] rounded-[1px]" />
+              <div className="bg-[#ffb900] rounded-[1px]" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-900">Microsoft Entra ID</p>
+              <p className="text-xs text-gray-500">Choose an account</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Directory listing */}
+        <div className="overflow-y-auto" style={{ maxHeight: "420px" }}>
+          {loading ? (
+            <div className="flex items-center justify-center py-12 gap-2 text-gray-500">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-sm">Loading directory…</span>
+            </div>
+          ) : users.length === 0 ? (
+            <p className="text-center text-gray-500 text-sm py-8">No accounts found.</p>
+          ) : (
+            <div className="py-1">
+              {users.map((u) => {
+                const rs = ROLE_STYLES[u.role] ?? ROLE_STYLES.EMPLOYEE;
+                return (
+                  <button
+                    key={u.id}
+                    onClick={() => onPick(u)}
+                    className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors text-left group"
+                  >
+                    {/* Avatar */}
+                    <div
+                      className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold text-white"
+                      style={{ backgroundColor: u.avatarColor }}
+                    >
+                      {u.initials}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-gray-900">{u.name}</span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${rs.bg} ${rs.text}`}>
+                          {rs.label}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">{u.email}</p>
+                      {u.reportsTo && (
+                        <p className="text-[10px] text-gray-400 mt-0.5">
+                          Reports to {u.reportsTo.name}
+                        </p>
+                      )}
+                    </div>
+
+                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 flex-shrink-0 transition-colors" />
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/50 text-center">
+          <p className="text-[10px] text-gray-400 font-mono">{users[0]?.email.split("@")[1] ?? "corp.atomquest.io"} directory</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Login Page ──────────────────────────────────────────────────────────
 export default function LoginPage() {
   const router = useRouter();
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState<string>("");
-
-  const handleCopy = (text: string, type: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(type);
-    setTimeout(() => setCopied(""), 2000);
-  };
+  const [showPicker, setShowPicker] = useState(false);
+  const [ssoLoading, setSsoLoading] = useState(false);
+  const [ssoUser, setSsoUser] = useState<SSOUser | null>(null);
 
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
-  } = useForm<LoginInput>({
-    resolver: zodResolver(LoginSchema),
-  });
-
-  const autofill = (email: string) => {
-    setValue("email", email, { shouldValidate: true });
-    setValue("password", "password123", { shouldValidate: true });
-  };
+  } = useForm<LoginInput>({ resolver: zodResolver(LoginSchema) });
 
   const onSubmit = async (data: LoginInput) => {
     setLoading(true);
     setError("");
-
     try {
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
         redirect: false,
       });
+      if (result?.error) { setError("Invalid email or password."); return; }
+      if (result?.ok) {
+        const res = await fetch("/api/auth/session");
+        const session = await res.json();
+        const role = (session?.user as any)?.role;
+        router.push(ROLE_ROUTE[role] ?? "/employee");
+      }
+    } catch { setError("An error occurred. Please try again."); }
+    finally { setLoading(false); }
+  };
 
+  const handlePickUser = async (user: SSOUser) => {
+    setShowPicker(false);
+    setSsoUser(user);
+    setSsoLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        email: user.email,
+        password: "password123",
+        redirect: false,
+      });
       if (result?.error) {
-        setError("Invalid email or password");
+        setError("SSO sign-in failed. Ensure demo accounts are seeded with password123.");
+        setSsoLoading(false);
+        setSsoUser(null);
         return;
       }
-
-      if (result?.ok) {
-        // Get the session to determine role
-        const response = await fetch("/api/auth/session");
-        const session = await response.json();
-        const role = (session?.user as any)?.role;
-
-        // Redirect based on role
-        if (role === "EMPLOYEE") {
-          router.push("/employee");
-        } else if (role === "MANAGER") {
-          router.push("/manager");
-        } else if (role === "ADMIN") {
-          router.push("/admin");
-        }
-      }
-    } catch (err) {
-      setError("An error occurred. Please try again.");
-    } finally {
-      setLoading(false);
+      // Brief pause for UX realism, then redirect
+      await new Promise((r) => setTimeout(r, 800));
+      router.push(ROLE_ROUTE[user.role] ?? "/employee");
+    } catch {
+      setError("An unexpected error occurred during SSO sign-in.");
+      setSsoLoading(false);
+      setSsoUser(null);
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200 px-4 sm:px-6 py-12 relative overflow-hidden">
-      {/* Decorative background blobs */}
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-      <div className="absolute top-[20%] right-[-10%] w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-      
-      <div className="w-full max-w-md relative z-10 space-y-8">
+  // Full-page SSO loading state
+  if (ssoLoading && ssoUser) {
+    const rs = ROLE_STYLES[ssoUser.role] ?? ROLE_STYLES.EMPLOYEE;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">AtomQuest</h1>
-          <p className="text-gray-500 mt-2 text-lg">Enterprise Goal Management</p>
+          <div
+            className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 text-lg font-bold text-white"
+            style={{ backgroundColor: ssoUser.avatarColor }}
+          >
+            {ssoUser.initials}
+          </div>
+          <p className="text-gray-900 font-semibold">{ssoUser.name}</p>
+          <p className="text-gray-500 text-sm mt-0.5">{ssoUser.email}</p>
+          <span className={`inline-block mt-2 text-xs font-bold px-2 py-1 rounded ${rs.bg} ${rs.text}`}>
+            {rs.label}
+          </span>
+          <div className="flex items-center justify-center gap-2 mt-6 text-gray-500 text-sm">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Signing in…
+          </div>
         </div>
+      </div>
+    );
+  }
 
-        <Card className="shadow-2xl border-0 ring-1 ring-gray-200/50 bg-white/95 backdrop-blur-sm">
-          <CardBody className="p-8">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {error && (
-                <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm font-medium flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-red-600 rounded-full"></div>
-                  {error}
-                </div>
-              )}
+  return (
+    <>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="w-full max-w-sm">
+          {/* Brand */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">AtomQuest</h1>
+            <p className="text-gray-500 mt-1 text-sm">Enterprise Goal Management Portal</p>
+          </div>
 
-              <div className="space-y-4">
-                <Input
-                  label="Email Address"
-                  placeholder="Enter your corporate email"
-                  type="email"
-                  {...register("email")}
-                  error={errors.email?.message}
-                  className="bg-gray-50/80"
-                />
+          {/* Card */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <h2 className="text-lg font-semibold text-gray-900 mb-6">Sign in</h2>
 
-                <Input
-                  label="Password"
-                  placeholder="••••••••"
-                  type="password"
-                  {...register("password")}
-                  error={errors.password?.message}
-                  className="bg-gray-50/80"
-                />
+            {/* Error */}
+            {error && (
+              <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm mb-5">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                {error}
               </div>
+            )}
 
+            {/* Microsoft Entra SSO */}
+            <button
+              onClick={() => setShowPicker(true)}
+              className="w-full flex items-center justify-center gap-2.5 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium py-2.5 px-4 rounded-xl transition-all duration-150 hover:border-gray-400 hover:shadow-sm text-sm mb-5"
+            >
+              <div className="grid grid-cols-2 gap-[2px] w-4 h-4 flex-shrink-0">
+                <div className="bg-[#f25022] rounded-[1px]" />
+                <div className="bg-[#7fba00] rounded-[1px]" />
+                <div className="bg-[#00a4ef] rounded-[1px]" />
+                <div className="bg-[#ffb900] rounded-[1px]" />
+              </div>
+              Continue with Microsoft Entra ID
+            </button>
+
+            {/* Divider */}
+            <div className="relative flex items-center gap-3 mb-5">
+              <div className="flex-1 h-px bg-gray-200" />
+              <span className="text-xs text-gray-400 font-medium">or</span>
+              <div className="flex-1 h-px bg-gray-200" />
+            </div>
+
+            {/* Email/Password form */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <Input
+                label="Email"
+                type="email"
+                placeholder="you@corp.io"
+                {...register("email")}
+                error={errors.email?.message}
+              />
+              <Input
+                label="Password"
+                type="password"
+                placeholder="••••••••"
+                {...register("password")}
+                error={errors.password?.message}
+              />
               <Button
                 variant="primary"
-                size="lg"
                 type="submit"
                 loading={loading}
-                className="w-full shadow-blue-500/30 shadow-lg text-base font-semibold py-3"
+                className="w-full mt-1"
               >
-                Sign In to Portal
+                Sign in
               </Button>
             </form>
-          </CardBody>
-        </Card>
-
-        <Card className="border border-indigo-100 shadow-lg bg-white/90 backdrop-blur-md overflow-hidden">
-          <div className="bg-indigo-50/50 border-b border-indigo-100 px-6 py-3">
-            <h3 className="text-xs font-bold text-indigo-800 uppercase tracking-wider text-center">Try Demo Workspace</h3>
           </div>
-          <CardBody className="p-5">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                { role: "ADMIN", email: "admin@demo.com", icon: ShieldCheck, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200", hover: "hover:border-purple-300 hover:shadow-md hover:shadow-purple-100" },
-                { role: "MANAGER", email: "manager@demo.com", icon: Briefcase, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200", hover: "hover:border-blue-300 hover:shadow-md hover:shadow-blue-100" },
-                { role: "EMPLOYEE", email: "priya@demo.com", icon: UserCircle, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200", hover: "hover:border-emerald-300 hover:shadow-md hover:shadow-emerald-100" },
-              ].map((account) => (
-                <div 
-                  key={account.role} 
-                  onClick={() => autofill(account.email)}
-                  className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 ${account.bg} ${account.border} ${account.hover} group`}
-                >
-                  <account.icon className={`w-6 h-6 mb-1.5 ${account.color} opacity-80 group-hover:opacity-100 transition-opacity`} />
-                  <span className={`text-[10px] font-bold tracking-wider uppercase ${account.color}`}>{account.role}</span>
-                  <span className="text-xs font-medium text-gray-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity absolute translate-y-6 bg-white/90 px-2 py-0.5 rounded shadow-sm">Autofill</span>
-                </div>
-              ))}
-            </div>
 
-            <div className="mt-5 pt-4 border-t border-gray-100 text-center">
-              <span className="text-xs text-gray-500 font-medium">Password for all demo accounts: </span>
-              <span className="text-xs font-bold text-gray-700 bg-gray-100 px-2 py-1 rounded">password123</span>
-            </div>
-          </CardBody>
-        </Card>
+          <p className="text-center text-gray-400 text-xs mt-6">
+            AtomQuest · Enterprise Edition
+          </p>
+        </div>
       </div>
-    </div>
+
+      {showPicker && (
+        <AccountPicker
+          onClose={() => setShowPicker(false)}
+          onPick={handlePickUser}
+        />
+      )}
+    </>
   );
 }
