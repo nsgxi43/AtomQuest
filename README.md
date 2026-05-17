@@ -337,6 +337,45 @@ The floating `DemoSwitcher` widget is an **evaluator assistance utility** — no
 This design means an evaluator logged in as `manager@demo.com` can traverse Q1 through Q4 lifecycle states while remaining under the Manager RBAC scope throughout.
 
 ---
+# Bonus / Advanced Implementations
+
+## Real-Time KPI Analytics Engine
+Built dynamic analytics computation for:
+
+- Quarterly performance aggregation
+- Goal completion scoring
+- Compliance evaluation
+- Trend analysis
+- Department-level performance insights
+
+---
+
+## Escalation & Compliance Engine
+Implemented enterprise governance safeguards including:
+
+- Delayed KPI detection
+- Escalation workflows
+- SLA monitoring
+- Risk state computation
+- Governance health scoring
+
+---
+## Advanced RBAC Security Model
+Implemented secure enterprise-grade access control using:
+
+- NextAuth.js authentication
+- JWT session strategy
+- Role-aware middleware
+- Route protection
+- Server-side authorization validation
+
+Supported Roles:
+
+- Admin
+- Manager
+- Employee
+
+---
 
 ## Production Deployment
 
