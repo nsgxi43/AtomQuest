@@ -1,4 +1,5 @@
 "use client";
+import toast from "react-hot-toast";
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -48,7 +49,7 @@ export default function EmployeeGoalPage() {
   const handleDeleteGoal = async (goalId: string) => {
     const goal = goals.find((g) => g.id === goalId);
     if (goal?.isShared) {
-      alert("Shared goals cannot be deleted by employees.");
+      toast.error("Shared goals cannot be deleted by employees.");
       return;
     }
     if (!confirm("Are you sure you want to delete this goal?")) return;
@@ -68,7 +69,7 @@ export default function EmployeeGoalPage() {
 
   const handleSubmitGoalSheet = async () => {
     if (Math.abs(totalWeightage - 100) > 0.01) {
-      alert("Total weightage must equal 100%");
+      toast.error("Total weightage must equal 100%");
       return;
     }
 
@@ -84,7 +85,7 @@ export default function EmployeeGoalPage() {
         );
       } else {
         const err = await response.json();
-        alert(err.error || "Failed to submit goal sheet");
+        toast.error(err.error || "Failed to submit goal sheet");
       }
     } catch (error) {
       console.error("Error submitting goal sheet:", error);
@@ -101,7 +102,7 @@ export default function EmployeeGoalPage() {
   const handleSaveWeightage = async (goalId: string) => {
     const newWeightage = parseFloat(editWeightageValue);
     if (isNaN(newWeightage) || newWeightage < 10 || newWeightage > 100) {
-      alert("Weightage must be between 10 and 100");
+      toast.error("Weightage must be between 10 and 100");
       return;
     }
 
@@ -130,10 +131,10 @@ export default function EmployeeGoalPage() {
         setEditingWeightageId(null);
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to update weightage");
+        toast.error(err.error || "Failed to update weightage");
       }
     } catch (e) {
-      alert("An error occurred");
+      toast.error("An error occurred");
     } finally {
       setSavingWeightage(false);
     }

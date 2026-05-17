@@ -4,6 +4,7 @@ import "./globals.css";
 import { auth } from "@/lib/auth";
 import SessionWrapper from "@/components/SessionWrapper";
 import { DemoSwitcher } from "@/components/DemoSwitcher";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,8 +32,11 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <SessionWrapper>{children}</SessionWrapper>
-        <DemoSwitcher />
+        <SessionWrapper>
+          {children}
+          <DemoSwitcher />
+        </SessionWrapper>
+        <Toaster position="top-center" toastOptions={{ duration: 4000, style: { background: '#333', color: '#fff' } }} />
       </body>
     </html>
   );

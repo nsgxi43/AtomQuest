@@ -39,7 +39,7 @@ export function Tr({
   ...props
 }: React.HTMLAttributes<HTMLTableRowElement>) {
   return (
-    <tr className={cn("border-b border-gray-200 hover:bg-gray-50", className)} {...props} />
+    <tr className={cn("border-b border-gray-100 hover:bg-gray-50/80 transition-colors", className)} {...props} />
   );
 }
 

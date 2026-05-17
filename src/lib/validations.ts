@@ -15,7 +15,7 @@ export const SubmitGoalSheetSchema = z.object({
   goals: z
     .array(CreateGoalSchema)
     .min(1, "At least one goal is required")
-    .max(8, "Maximum 8 goals allowed")
+    .max(8, "You have reached the maximum limit of 8 goals. Please redistribute existing goal weightages to achieve the required 100% allocation.")
     .refine((goals) => {
       const totalWeightage = goals.reduce((sum, g) => sum + g.weightage, 0);
       return Math.abs(totalWeightage - 100) < 0.01; // Account for floating point precision

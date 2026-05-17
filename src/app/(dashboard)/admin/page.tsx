@@ -1,4 +1,5 @@
 "use client";
+import toast from "react-hot-toast";
 
 import { useEffect, useState } from "react";
 import { Lock, Unlock } from "lucide-react";
@@ -48,15 +49,15 @@ export default function AdminPage() {
         method: "POST",
       });
       if (res.ok) {
-        alert("Goal sheet unlocked. Employee can now edit again.");
+        toast.success("Goal sheet unlocked. Employee can now edit again.");
         await fetchGoalSheets();
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to unlock goal sheet");
+        toast.error(err.error || "Failed to unlock goal sheet");
       }
     } catch (err) {
       console.error("Error unlocking:", err);
-      alert("An error occurred while unlocking");
+      toast.error("An error occurred while unlocking");
     } finally {
       setUnlocking(null);
     }

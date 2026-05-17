@@ -10,7 +10,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-lg border border-gray-200 bg-white shadow-sm",
+        "rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden",
         className
       )}
       {...props}
@@ -23,7 +23,7 @@ export function CardHeader({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("px-6 py-4 border-b border-gray-200", className)} {...props} />
+    <div className={cn("px-6 py-5 border-b border-gray-100 bg-white", className)} {...props} />
   );
 }
 
@@ -31,7 +31,7 @@ export function CardBody({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("px-6 py-4", className)} {...props} />;
+  return <div className={cn("px-6 py-5", className)} {...props} />;
 }
 
 export function CardFooter({
@@ -41,7 +41,7 @@ export function CardFooter({
   return (
     <div
       className={cn(
-        "px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-2",
+        "px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-2",
         className
       )}
       {...props}

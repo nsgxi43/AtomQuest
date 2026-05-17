@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     if (existingGoals >= 8) {
       return NextResponse.json(
-        { error: "Maximum 8 goals allowed per goal sheet" },
+        { error: "You have reached the maximum limit of 8 goals. Please redistribute existing goal weightages to achieve the required 100% allocation." },
         { status: 400 }
       );
     }

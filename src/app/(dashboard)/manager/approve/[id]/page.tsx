@@ -1,10 +1,14 @@
 "use client";
+import toast from "react-hot-toast";
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, CheckCircle2, Share2 } from "lucide-react";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/Table";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { GoalSheet, Goal } from "@/types";
@@ -64,7 +68,7 @@ export default function ManagerApprovePage({
 
   const handleApprove = async () => {
     if (!weightageOk) {
-      alert(`Total weightage is ${totalWeightage}%. Must equal 100% before approving.`);
+      toast.error(`Total weightage is ${totalWeightage}%. Must equal 100% before approving.`);
       return;
     }
     setApproving(true);
@@ -77,15 +81,15 @@ export default function ManagerApprovePage({
         setGoalSheet((prev) =>
           prev ? { ...prev, status: "LOCKED" } : null
         );
-        alert("Goal sheet approved and locked successfully");
+        toast.success("Goal sheet approved and locked successfully");
         router.push("/manager");
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to approve goal sheet");
+        toast.error(error.error || "Failed to approve goal sheet");
       }
     } catch (error) {
       console.error("Error approving:", error);
-      alert("An error occurred while approving");
+      toast.error("An error occurred while approving");
     } finally {
       setApproving(false);
     }
@@ -93,7 +97,7 @@ export default function ManagerApprovePage({
 
   const handleReturn = async () => {
     if (!returnComment || returnComment.length < 10) {
-      alert("Please provide a return reason (min 10 characters)");
+      toast.error("Please provide a return reason (min 10 characters)");
       return;
     }
 
@@ -109,16 +113,16 @@ export default function ManagerApprovePage({
       });
 
       if (response.ok) {
-        alert("Goal sheet returned for revision");
+        toast.success("Goal sheet returned for revision");
         setShowReturnModal(false);
         router.push("/manager");
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to return goal sheet");
+        toast.error(error.error || "Failed to return goal sheet");
       }
     } catch (error) {
       console.error("Error returning:", error);
-      alert("An error occurred while returning goal sheet");
+      toast.error("An error occurred while returning goal sheet");
     } finally {
       setReturning(false);
     }
@@ -304,13 +308,13 @@ export default function ManagerApprovePage({
                   <Td>{goal.thrustArea}</Td>
                   <Td>
                     {editingGoalId === goal.id ? (
-                      <input
+                      <Input
                         type="text"
                         value={editValues[goal.id]?.target ?? goal.target}
                         onChange={(e) =>
                           handleEditChange(goal.id, "target", e.target.value)
                         }
-                        className="w-28 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        className="w-32 text-sm px-3 py-1.5"
                       />
                     ) : (
                       goal.target
@@ -319,7 +323,7 @@ export default function ManagerApprovePage({
                   <Td>
                     {editingGoalId === goal.id ? (
                       <div className="flex items-center gap-1">
-                        <input
+                        <Input
                           type="number"
                           min="10"
                           max="100"
@@ -332,7 +336,7 @@ export default function ManagerApprovePage({
                               e.target.value
                             )
                           }
-                          className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          className="w-24 text-sm px-3 py-1.5"
                         />
                         <span className="text-gray-500 text-sm">%</span>
                       </div>
@@ -434,16 +438,15 @@ export default function ManagerApprovePage({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Quarter
               </label>
-              <select
+              <Select
                 value={returnQuarter}
                 onChange={(e) => setReturnQuarter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="Q1">Q1</option>
                 <option value="Q2">Q2</option>
                 <option value="Q3">Q3</option>
                 <option value="Q4">Q4</option>
-              </select>
+              </Select>
             </div>
 
             <div>
@@ -451,11 +454,11 @@ export default function ManagerApprovePage({
                 Reason for Return{" "}
                 <span className="text-gray-400">(min 10 characters)</span>
               </label>
-              <textarea
+              <Textarea
                 value={returnComment}
                 onChange={(e) => setReturnComment(e.target.value)}
                 placeholder="Explain why this goal sheet is being returned..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg h-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={4}
               />
               <p className="text-gray-500 text-xs mt-1">
                 {returnComment.length} characters{" "}

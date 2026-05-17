@@ -1,4 +1,5 @@
 "use client";
+import toast from "react-hot-toast";
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -157,15 +158,15 @@ export default function QuarterlyTrackingPage() {
       const results = await Promise.allSettled(goals.map(saveSingleGoal));
       const failed = results.filter((r) => r.status === "rejected");
       if (failed.length > 0) {
-        alert(`${failed.length} update(s) failed. Please try again.`);
+        toast.error(`${failed.length} update(s) failed. Please try again.`);
       } else {
-        alert("All updates saved successfully!");
+        toast.success("All updates saved successfully!");
         const updatesData = await fetchUpdates();
         setUpdates(updatesData);
       }
     } catch (error) {
       console.error("Error saving updates:", error);
-      alert("Failed to save updates");
+      toast.error("Failed to save updates");
     } finally {
       setSaving(false);
     }
@@ -185,8 +186,8 @@ export default function QuarterlyTrackingPage() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Quarterly Tracking</h1>
-          <p className="text-gray-600 mt-1">Track goal progress by quarter</p>
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Quarterly Tracking</h1>
+          <p className="text-gray-500 mt-2 text-lg">Track goal progress by quarter</p>
         </div>
         <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg text-sm font-medium border border-blue-100">
           {getCycleStatus(effectiveDate).message}
@@ -224,9 +225,9 @@ export default function QuarterlyTrackingPage() {
         })}
       </div>
 
-      <Card>
-        <CardHeader>
-          <h2 className="text-lg font-semibold">{activeQuarter} Progress</h2>
+      <Card className="shadow-lg border-0 ring-1 ring-gray-200/50">
+        <CardHeader className="bg-gray-50/80 border-b border-gray-100 px-6 py-4">
+          <h2 className="text-lg font-bold text-gray-800">{activeQuarter} Progress</h2>
         </CardHeader>
         <CardBody>
           {goals.length === 0 ? (
@@ -281,19 +282,19 @@ export default function QuarterlyTrackingPage() {
                       </Td>
                       <Td>{goal.target}</Td>
                       <Td>
-                        <input
-                          type={goal.uom === "TIMELINE" ? "date" : "text"}
-                          value={stateData?.actualAchievement || ""}
-                          onChange={(e) =>
-                            handleActualChange(goal.id, e.target.value)
-                          }
-                          className="w-32 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-gray-100 disabled:text-gray-500"
-                          placeholder={goal.uom === "TIMELINE" ? "YYYY-MM-DD" : "Enter value"}
-                          disabled={
-                            getQuarterState(activeQuarter as Quarter, effectiveDate) !== "ACTIVE" ||
-                            (goal.isShared && !goal.isPrimaryOwner)
-                          }
-                        />
+                          <input
+                            type={goal.uom === "TIMELINE" ? "date" : "text"}
+                            value={stateData?.actualAchievement || ""}
+                            onChange={(e) =>
+                              handleActualChange(goal.id, e.target.value)
+                            }
+                            className="w-36 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 text-sm font-medium text-gray-900 disabled:bg-gray-100 disabled:text-gray-400 transition-colors shadow-sm hover:border-gray-400"
+                            placeholder={goal.uom === "TIMELINE" ? "YYYY-MM-DD" : "Enter value"}
+                            disabled={
+                              getQuarterState(activeQuarter as Quarter, effectiveDate) !== "ACTIVE" ||
+                              (goal.isShared && !goal.isPrimaryOwner)
+                            }
+                          />
                       </Td>
                       <Td>
                         {update?.computedScore != null ? (
@@ -332,21 +333,24 @@ export default function QuarterlyTrackingPage() {
         </div>
       )}
 
-      <Button
-        variant="primary"
-        onClick={handleSave}
-        loading={saving}
-        disabled={goals.length === 0 || getQuarterState(activeQuarter as Quarter, effectiveDate) !== "ACTIVE"}
-        className="flex items-center gap-2"
-      >
-        <RefreshCw className="w-4 h-4" />
-        Save Progress
-        {goals.some((g) => g.isShared) && (
-          <span className="text-xs opacity-75 ml-1">
-            (shared goals will sync)
-          </span>
-        )}
-      </Button>
+      <div className="pt-4 flex justify-end">
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={handleSave}
+          loading={saving}
+          disabled={goals.length === 0 || getQuarterState(activeQuarter as Quarter, effectiveDate) !== "ACTIVE"}
+          className="flex items-center gap-2 px-8 py-3 shadow-lg shadow-blue-500/30"
+        >
+          <RefreshCw className="w-5 h-5" />
+          <span className="font-bold tracking-wide">Save Progress</span>
+          {goals.some((g) => g.isShared) && (
+            <span className="text-xs opacity-80 ml-2 font-medium">
+              (Syncs shared goals)
+            </span>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }

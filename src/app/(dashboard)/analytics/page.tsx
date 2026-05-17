@@ -142,7 +142,7 @@ export default function AnalyticsPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Goal Status Pie Chart */}
         <Card>
           <CardHeader>
@@ -204,7 +204,7 @@ export default function AnalyticsPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Thrust Area Distribution */}
         <Card>
           <CardHeader>
@@ -254,20 +254,20 @@ export default function AnalyticsPage() {
               <Thead className="sticky top-0 bg-gray-50 shadow-sm z-10">
                 <Tr>
                   <Th>Employee</Th>
-                  <Th>Q1</Th>
-                  <Th>Q2</Th>
-                  <Th>Q3</Th>
-                  <Th>Q4</Th>
+                  <Th className="text-center">Q1</Th>
+                  <Th className="text-center">Q2</Th>
+                  <Th className="text-center">Q3</Th>
+                  <Th className="text-center">Q4</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {data.heatmap.map((emp, i) => (
                   <Tr key={i}>
                     <Td className="font-medium text-gray-900">{emp.employee}</Td>
-                    <Td>{renderBadge(emp.Q1)}</Td>
-                    <Td>{renderBadge(emp.Q2)}</Td>
-                    <Td>{renderBadge(emp.Q3)}</Td>
-                    <Td>{renderBadge(emp.Q4)}</Td>
+                    <Td className="text-center">{renderBadge(emp.Q1)}</Td>
+                    <Td className="text-center">{renderBadge(emp.Q2)}</Td>
+                    <Td className="text-center">{renderBadge(emp.Q3)}</Td>
+                    <Td className="text-center">{renderBadge(emp.Q4)}</Td>
                   </Tr>
                 ))}
                 {data.heatmap.length === 0 && (

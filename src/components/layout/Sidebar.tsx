@@ -28,7 +28,12 @@ export function Sidebar() {
   const pathname = usePathname();
   const role = (session?.user as any)?.role as string | undefined;
 
-  const isActive = (href: string) => pathname.startsWith(href);
+  const isActive = (href: string) => {
+    if (!pathname) return false;
+    if (pathname === href) return true;
+    if (href === '/employee' || href === '/manager' || href === '/admin') return false;
+    return pathname.startsWith(href);
+  };
 
   const allLinks: Array<NavLink & { roles: string[] }> = [
     { href: "/employee", label: "Goals", icon: FileText, roles: ["EMPLOYEE"] },
@@ -90,10 +95,10 @@ export function Sidebar() {
             key={link.href}
             href={link.href}
             className={cn(
-              "flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors",
+              "flex items-center gap-3 px-4 py-3 rounded-xl mb-2 transition-all duration-200",
               isActive(link.href)
-                ? "bg-blue-600 text-white"
-                : "text-gray-300 hover:bg-gray-800"
+                ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/20 font-medium"
+                : "text-gray-400 hover:bg-gray-800 hover:text-white"
             )}
           >
             <link.icon className="w-5 h-5" />

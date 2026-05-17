@@ -56,14 +56,12 @@ export default function ReportsPage() {
   const [rows, setRows] = useState<ReportRow[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [quarterFilter, setQuarterFilter] = useState("");
 
-  const fetchData = useCallback(async (q?: string) => {
+  const fetchData = useCallback(async () => {
     try {
-      const params = q ? `?quarter=${q}` : "";
       const [reportRes, statsRes] = await Promise.all([
-        fetch(`/api/reports${params}`),
+        fetch(`/api/reports`),
         fetch("/api/dashboard/stats"),
       ]);
       const [reportData, statsData] = await Promise.all([
@@ -81,11 +79,16 @@ export default function ReportsPage() {
     fetchData().finally(() => setLoading(false));
   }, [fetchData]);
 
-  const handleFilter = async () => {
-    setRefreshing(true);
-    await fetchData(quarterFilter || undefined);
-    setRefreshing(false);
-  };
+  // Client-side filtering ensures instant updates and correct dataset rendering
+  const filteredRows = rows.filter((row) => {
+    if (!quarterFilter) return true;
+    const rowQuarter = (row.quarter || "").trim().toUpperCase();
+    const filterQ = quarterFilter.trim().toUpperCase();
+    // Allow matching even if the row says "ALL" when a specific quarter is selected, OR just exact match.
+    // Actually, if a goal has no updates, backend returns quarter: "ALL". We might want to show them if no quarter is selected, but hide them if a specific quarter is selected, unless we want to show NOT_STARTED for that quarter.
+    // The requirement says: "Ensure table renders FILTERED dataset instead of raw dataset."
+    return rowQuarter === filterQ || rowQuarter === "ALL";
+  });
 
   const handleExportCSV = () => {
     const headers = [
@@ -106,7 +109,7 @@ export default function ReportsPage() {
 
     const csvRows = [
       headers,
-      ...rows.map((r) => [
+      ...filteredRows.map((r) => [
         r.employee,
         r.email,
         `"${r.goal.replace(/"/g, '""')}"`,
@@ -160,7 +163,7 @@ export default function ReportsPage() {
           size="sm"
           onClick={handleExportCSV}
           className="flex items-center gap-2"
-          disabled={rows.length === 0}
+          disabled={filteredRows.length === 0}
         >
           <Download className="w-4 h-4" />
           Export CSV
@@ -326,9 +329,9 @@ export default function ReportsPage() {
         <CardHeader className="flex flex-wrap justify-between items-center gap-3">
           <h2 className="text-lg font-semibold text-gray-900">
             Achievement Report
-            {rows.length > 0 && (
+            {filteredRows.length > 0 && (
               <span className="ml-2 text-sm font-normal text-gray-500">
-                ({rows.length} rows)
+                ({filteredRows.length} rows)
               </span>
             )}
           </h2>
@@ -346,22 +349,10 @@ export default function ReportsPage() {
               ))}
             </select>
             <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleFilter}
-              loading={refreshing}
-              className="flex items-center gap-1"
-            >
-              <Filter className="w-3 h-3" />
-              Filter
-            </Button>
-            <Button
               variant="ghost"
               size="sm"
               onClick={() => {
                 setQuarterFilter("");
-                setRefreshing(true);
-                fetchData().finally(() => setRefreshing(false));
               }}
               className="flex items-center gap-1"
             >
@@ -371,7 +362,7 @@ export default function ReportsPage() {
           </div>
         </CardHeader>
         <CardBody>
-          {rows.length === 0 ? (
+          {filteredRows.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <p className="font-medium">No report data available</p>
               <p className="text-sm mt-1">
@@ -395,7 +386,7 @@ export default function ReportsPage() {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {rows.map((row, idx) => (
+                  {filteredRows.map((row, idx) => (
                     <Tr key={`${row.goalId}-${row.quarter}-${idx}`}>
                       <Td>
                         <div>

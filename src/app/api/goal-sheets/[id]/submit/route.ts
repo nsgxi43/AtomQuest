@@ -31,7 +31,7 @@ export async function POST(
     // Validate: max 8 goals and total weightage = 100
     if (goalSheet.goals.length > 8) {
       return NextResponse.json(
-        { error: "Maximum 8 goals allowed" },
+        { error: "You have reached the maximum limit of 8 goals. Please redistribute existing goal weightages to achieve the required 100% allocation." },
         { status: 400 }
       );
     }

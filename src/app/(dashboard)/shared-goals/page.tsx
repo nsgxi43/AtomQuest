@@ -1,4 +1,5 @@
 "use client";
+import toast from "react-hot-toast";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -6,6 +7,8 @@ import { useSession } from "next-auth/react";
 import { Plus, Trash2, Share2, Users } from "lucide-react";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/Table";
 import { Badge } from "@/components/ui/Badge";
 import { formatDate } from "@/lib/utils";
@@ -177,10 +180,10 @@ export default function SharedGoalsPage() {
         setSharedGoals((prev) => prev.filter((g) => g.id !== id));
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to delete shared goal.");
+        toast.error(err.error || "Failed to delete shared goal.");
       }
     } catch (e) {
-      alert("An error occurred.");
+      toast.error("An error occurred.");
     } finally {
       setDeleting(null);
     }
@@ -234,28 +237,26 @@ export default function SharedGoalsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Goal Title *
                 </label>
-                <input
+                <Input
                   type="text"
                   value={form.title}
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, title: e.target.value }))
                   }
                   placeholder="e.g., Reduce customer complaints"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Thrust Area *
                 </label>
-                <input
+                <Input
                   type="text"
                   value={form.thrustArea}
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, thrustArea: e.target.value }))
                   }
                   placeholder="e.g., Customer Experience"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -265,32 +266,30 @@ export default function SharedGoalsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Target *
                 </label>
-                <input
+                <Input
                   type="text"
                   value={form.target}
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, target: e.target.value }))
                   }
                   placeholder="e.g., 95, 2025-12-31"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Unit of Measure *
                 </label>
-                <select
+                <Select
                   value={form.uom}
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, uom: e.target.value }))
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="NUMERIC_MAX">Numeric (Maximize)</option>
                   <option value="NUMERIC_MIN">Numeric (Minimize)</option>
                   <option value="TIMELINE">Timeline</option>
                   <option value="ZERO">Zero/Binary</option>
-                </select>
+                </Select>
               </div>
             </div>
 
@@ -322,21 +321,21 @@ export default function SharedGoalsPage() {
                           <div className="pl-6 flex items-center gap-2">
                             <span className="text-xs text-gray-500">Weightage:</span>
                             <div className="relative w-20">
-                              <input
-                                type="number"
-                                min="1"
-                                max="100"
-                                value={form.employeeWeightages[emp.id] || ""}
-                                onChange={(e) => setForm(prev => ({
-                                  ...prev,
-                                  employeeWeightages: {
-                                    ...prev.employeeWeightages,
-                                    [emp.id]: parseFloat(e.target.value) || 0
-                                  }
-                                }))}
-                                className="w-full text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 pr-5"
-                                placeholder="%"
-                              />
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  max="100"
+                                  value={form.employeeWeightages[emp.id] || ""}
+                                  onChange={(e) => setForm(prev => ({
+                                    ...prev,
+                                    employeeWeightages: {
+                                      ...prev.employeeWeightages,
+                                      [emp.id]: parseFloat(e.target.value) || 0
+                                    }
+                                  }))}
+                                  className="pr-5 py-1.5"
+                                  placeholder="%"
+                                />
                               <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">%</span>
                             </div>
                           </div>
@@ -357,12 +356,11 @@ export default function SharedGoalsPage() {
               {form.assignToEmployeeIds.length === 0 ? (
                 <p className="text-xs text-gray-500 italic">Select employees first to pick a primary owner.</p>
               ) : (
-                <select
+                <Select
                   value={form.primaryOwnerId}
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, primaryOwnerId: e.target.value }))
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="" disabled>Select primary owner...</option>
                   {employees
@@ -372,7 +370,7 @@ export default function SharedGoalsPage() {
                         {emp.name} ({emp.email})
                       </option>
                     ))}
-                </select>
+                </Select>
               )}
             </div>
 

@@ -1,9 +1,12 @@
 "use client";
+import toast from "react-hot-toast";
 import { useState, useEffect } from "react";
 
 import { MessageSquare, Lock, Share2 } from "lucide-react";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/Table";
 import { ScoreBar } from "@/components/ui/ScoreBar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -124,7 +127,7 @@ export default function ManagerCheckInPage() {
 
   const handleSubmit = async () => {
     if (!goalSheet || !comment || comment.length < 10) {
-      alert("Please select an employee and enter a comment (min 10 characters)");
+      toast.error("Please select an employee and enter a comment (min 10 characters)");
       return;
     }
 
@@ -141,7 +144,7 @@ export default function ManagerCheckInPage() {
       });
 
       if (res.ok) {
-        alert("Check-in comment saved successfully");
+        toast.success("Check-in comment saved successfully");
         setComment("");
         // Refresh goal sheet to show new comment
         const fullRes = await fetch(`/api/goal-sheets/${goalSheet.id}`);
@@ -149,11 +152,11 @@ export default function ManagerCheckInPage() {
         setGoalSheet(fullData);
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to save check-in");
+        toast.error(err.error || "Failed to save check-in");
       }
     } catch (error) {
       console.error("Error saving check-in:", error);
-      alert("An error occurred while saving check-in");
+      toast.error("An error occurred while saving check-in");
     } finally {
       setSubmitting(false);
     }
@@ -195,13 +198,12 @@ export default function ManagerCheckInPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Select Employee
             </label>
-            <select
+            <Select
               value={selectedEmployeeId}
               onChange={(e) => {
                 setSelectedEmployeeId(e.target.value);
                 setComment("");
               }}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Choose an employee</option>
               {employees.map((emp) => (
@@ -209,7 +211,7 @@ export default function ManagerCheckInPage() {
                   {emp.name} ({emp.email})
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {/* Quarter tabs */}
@@ -370,12 +372,12 @@ export default function ManagerCheckInPage() {
                 Comment{" "}
                 <span className="text-gray-400">(min 10 characters)</span>
               </label>
-              <textarea
+              <Textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Provide constructive feedback on goal progress..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg h-32 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
                 disabled={getQuarterState(selectedQuarter as Quarter, effectiveDate) !== "ACTIVE"}
+                rows={4}
               />
               <p className="text-gray-500 text-xs mt-1">
                 {comment.length} characters

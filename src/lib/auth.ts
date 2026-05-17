@@ -1,13 +1,10 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { getServerSession, type NextAuthOptions } from "next-auth";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
 
 export const authOptions: NextAuthOptions = {
-  // Cast to any: @auth/prisma-adapter ships @auth/core types (v5) but we use next-auth v4 at runtime
-  adapter: PrismaAdapter(prisma) as any,
   providers: [
     Credentials({
       name: "Credentials",
@@ -55,7 +52,9 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     session: async ({ session, token }) => {
-      if (session.user) {
+      console.log("SESSION CALLBACK - session:", session);
+      console.log("SESSION CALLBACK - token:", token);
+      if (session?.user && token) {
         session.user.role = token.role as string;
         session.user.id = token.id as string;
       }
