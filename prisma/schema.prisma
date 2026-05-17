@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+  ADMIN
+}
+
+enum GoalSheetStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  RETURNED
+  LOCKED
+}
+
+enum UoM {
+  NUMERIC_MIN
+  NUMERIC_MAX
+  TIMELINE
+  ZERO
+}
+
+enum Quarter {
+  Q1
+  Q2
+  Q3
+  Q4
+}
+
+enum UpdateStatus {
+  NOT_STARTED
+  ON_TRACK
+  COMPLETED
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  password      String
+  role          Role     @default(EMPLOYEE)
+  managerId     String?
+  manager       User?    @relation("ManagerEmployee", fields: [managerId], references: [id])
+  subordinates  User[]   @relation("ManagerEmployee")
+  goalSheets    GoalSheet[]
+  checkins      CheckinComment[]
+  auditLogs     AuditLog[]
+  sharedGoals   SharedGoal[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@map("users")
+}
+
+model GoalSheet {
+  id          String          @id @default(cuid())
+  employeeId  String
+  employee    User            @relation(fields: [employeeId], references: [id])
+  cycleYear   Int             @default(2025)
+  status      GoalSheetStatus @default(DRAFT)
+  goals       Goal[]
+  checkins    CheckinComment[]
+  submittedAt DateTime?
+  approvedAt  DateTime?
+  lockedAt    DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  @@map("goal_sheets")
+}
+
+model Goal {
+  id            String    @id @default(cuid())
+  goalSheetId   String
+  goalSheet     GoalSheet @relation(fields: [goalSheetId], references: [id])
+  thrustArea    String
+  title         String
+  description   String?
+  uom           UoM
+  target        String
+  weightage     Float
+  isShared      Boolean   @default(false)
+  sharedFromId  String?
+  sharedGoal    SharedGoal? @relation(fields: [sharedFromId], references: [id])
+  updates       QuarterlyUpdate[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  @@map("goals")
+}
+
+model SharedGoal {
+  id          String   @id @default(cuid())
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  title       String
+  thrustArea  String
+  target      String
+  uom         UoM
+  goals       Goal[]
+  createdAt   DateTime @default(now())
+  @@map("shared_goals")
+}
+
+model QuarterlyUpdate {
+  id               String       @id @default(cuid())
+  goalId           String
+  goal             Goal         @relation(fields: [goalId], references: [id])
+  quarter          Quarter
+  actualAchievement String?
+  status           UpdateStatus @default(NOT_STARTED)
+  computedScore    Float?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  @@unique([goalId, quarter])
+  @@map("quarterly_updates")
+}
+
+model CheckinComment {
+  id          String    @id @default(cuid())
+  goalSheetId String
+  goalSheet   GoalSheet @relation(fields: [goalSheetId], references: [id])
+  managerId   String
+  manager     User      @relation(fields: [managerId], references: [id])
+  quarter     Quarter
+  comment     String
+  createdAt   DateTime  @default(now())
+  @@map("checkin_comments")
+}
+
+model AuditLog {
+  id                String   @id @default(cuid())
+  entityType        String
+  entityId          String
+  changedById       String
+  changedBy         User     @relation(fields: [changedById], references: [id])
+  changeDescription String
+  oldValue          String?
+  newValue          String?
+  changedAt         DateTime @default(now())
+  @@map("audit_logs")
+}
