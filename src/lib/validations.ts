@@ -28,7 +28,7 @@ export const QuarterlyUpdateSchema = z.object({
   goalId: z.string().min(1, "Goal ID is required"),
   quarter: z.enum(["Q1", "Q2", "Q3", "Q4"]),
   actualAchievement: z.string().optional(),
-  status: z.enum(["NOT_STARTED", "ON_TRACK", "COMPLETED"]),
+  status: z.enum(["NOT_STARTED", "ON_TRACK", "COMPLETED", "DELAYED", "AT_RISK"]),
 });
 
 export type QuarterlyUpdateInput = z.infer<typeof QuarterlyUpdateSchema>;

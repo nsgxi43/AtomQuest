@@ -10,6 +10,8 @@ interface BadgeProps {
     | "returned"
     | "locked"
     | "not-started"
+    | "delayed"
+    | "at-risk"
     | "on-track"
     | "completed";
   children: React.ReactNode;
@@ -24,6 +26,8 @@ export function Badge({ variant = "draft", children, className }: BadgeProps) {
     returned: "bg-yellow-100 text-yellow-800",
     locked: "bg-purple-100 text-purple-800",
     "not-started": "bg-gray-100 text-gray-800",
+    "delayed": "bg-red-100 text-red-800",
+    "at-risk": "bg-orange-100 text-orange-800",
     "on-track": "bg-blue-100 text-blue-800",
     completed: "bg-green-100 text-green-800",
   };

@@ -39,6 +39,8 @@ enum UpdateStatus {
   NOT_STARTED
   ON_TRACK
   COMPLETED
+  DELAYED
+  AT_RISK
 }
 
 model User {

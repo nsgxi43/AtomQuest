@@ -9,6 +9,8 @@ type BadgeVariant =
   | "returned"
   | "locked"
   | "not-started"
+  | "delayed"
+  | "at-risk"
   | "on-track"
   | "completed";
 
@@ -32,6 +34,8 @@ const goalSheetStatusMap: Record<string, StatusEntry> = {
 
 const updateStatusMap: Record<string, StatusEntry> = {
   NOT_STARTED: { label: "Not Started", variant: "not-started" },
+  DELAYED: { label: "Delayed", variant: "delayed" },
+  AT_RISK: { label: "At Risk", variant: "at-risk" },
   ON_TRACK: { label: "On Track", variant: "on-track" },
   COMPLETED: { label: "Completed", variant: "completed" },
 };

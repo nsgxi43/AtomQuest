@@ -64,6 +64,17 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Audit log
+    await prisma.auditLog.create({
+      data: {
+        entityType: "Goal",
+        entityId: goal.id,
+        changedById: (session.user as any).id,
+        changeDescription: "Goal created",
+        newValue: `${goal.title} (${goal.weightage}%)`,
+      },
+    });
+
     return NextResponse.json(goal, { status: 201 });
   } catch (error: any) {
     console.error("Error creating goal:", error);
@@ -81,13 +92,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Only locked goal sheets are trackable
     const goalSheet = await prisma.goalSheet.findFirst({
       where: {
         employeeId: (session.user as any).id,
+        status: "LOCKED",
       },
       include: {
         goals: true,
       },
+      orderBy: { createdAt: "desc" },
     });
 
     if (!goalSheet) {

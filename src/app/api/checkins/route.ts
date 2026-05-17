@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { canEditQuarter } from "@/lib/cycle";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,6 +11,13 @@ export async function POST(request: NextRequest) {
     }
 
     const { goalSheetId, quarter, comment } = await request.json();
+
+    if (!canEditQuarter(quarter, (session.user as any).role)) {
+      return NextResponse.json(
+        { error: `The check-in window for ${quarter} is currently closed.` },
+        { status: 403 }
+      );
+    }
 
     if (!comment || comment.length < 10) {
       return NextResponse.json(
@@ -41,6 +49,17 @@ export async function POST(request: NextRequest) {
         managerId: (session.user as any).id,
         quarter,
         comment,
+      },
+    });
+
+    // Audit log
+    await prisma.auditLog.create({
+      data: {
+        entityType: "CheckinComment",
+        entityId: checkin.id,
+        changedById: (session.user as any).id,
+        changeDescription: `Manager check-in comment added for ${quarter}`,
+        newValue: comment.slice(0, 100),
       },
     });
 

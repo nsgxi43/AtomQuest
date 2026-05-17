@@ -2,18 +2,21 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { RefreshCw, Share2 } from "lucide-react";
+import { RefreshCw, Share2, Lock } from "lucide-react";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/Table";
 import { ScoreBar } from "@/components/ui/ScoreBar";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Goal, QuarterlyUpdate } from "@/types";
+import { calculateGoalProgress } from "@/lib/utils";
+import { getCycleStatus, getQuarterState, getQuarterMessage, Quarter } from "@/lib/cycle";
 
 type UpdateState = Record<
   string,
   {
     actualAchievement: string;
-    status: "NOT_STARTED" | "ON_TRACK" | "COMPLETED";
+    status: "NOT_STARTED" | "ON_TRACK" | "COMPLETED" | "DELAYED" | "AT_RISK";
   }
 >;
 
@@ -87,26 +90,20 @@ export default function QuarterlyTrackingPage() {
   }, [activeQuarter, updates, goals]);
 
   const handleActualChange = (goalId: string, value: string) => {
-    setUpdateState((prev) => ({
-      ...prev,
-      [goalId]: {
-        ...prev[goalId],
-        actualAchievement: value,
-      },
-    }));
-  };
+    setUpdateState((prev) => {
+      const goal = goals.find((g) => g.id === goalId);
+      if (!goal) return prev;
+      const { status: newStatus } = calculateGoalProgress(goal.uom, goal.target, value);
 
-  const handleStatusChange = (
-    goalId: string,
-    status: "NOT_STARTED" | "ON_TRACK" | "COMPLETED"
-  ) => {
-    setUpdateState((prev) => ({
-      ...prev,
-      [goalId]: {
-        ...prev[goalId],
-        status,
-      },
-    }));
+      return {
+        ...prev,
+        [goalId]: {
+          ...prev[goalId],
+          actualAchievement: value,
+          status: newStatus,
+        },
+      };
+    });
   };
 
   /**
@@ -183,22 +180,45 @@ export default function QuarterlyTrackingPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Quarterly Tracking</h1>
-        <p className="text-gray-600 mt-1">Track goal progress by quarter</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Quarterly Tracking</h1>
+          <p className="text-gray-600 mt-1">Track goal progress by quarter</p>
+        </div>
+        <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg text-sm font-medium border border-blue-100">
+          {getCycleStatus().message}
+        </div>
       </div>
 
       <div className="flex gap-2 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        {quarters.map((q) => (
-          <Button
-            key={q}
-            variant={activeQuarter === q ? "primary" : "secondary"}
-            size="sm"
-            onClick={() => setActiveQuarter(q)}
-          >
-            {q}
-          </Button>
-        ))}
+        {quarters.map((q) => {
+          const state = getQuarterState(q as Quarter);
+          const isFuture = state === "LOCKED_FUTURE";
+          const message = getQuarterMessage(q as Quarter);
+
+          return (
+            <div key={q} className="relative group">
+              <Button
+                variant={activeQuarter === q ? "primary" : "secondary"}
+                size="sm"
+                onClick={() => {
+                  if (!isFuture) setActiveQuarter(q);
+                }}
+                disabled={isFuture}
+                className={isFuture ? "opacity-50 cursor-not-allowed flex items-center gap-1" : "flex items-center gap-1"}
+              >
+                {q}
+                {isFuture && <Lock className="w-3 h-3" />}
+              </Button>
+              {/* Tooltip for Quarter Message */}
+              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block w-max max-w-xs bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg z-10">
+                {message}
+                {/* Tooltip arrow */}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <Card>
@@ -252,13 +272,14 @@ export default function QuarterlyTrackingPage() {
                       <Td>{goal.target}</Td>
                       <Td>
                         <input
-                          type="text"
+                          type={goal.uom === "TIMELINE" ? "date" : "text"}
                           value={stateData?.actualAchievement || ""}
                           onChange={(e) =>
                             handleActualChange(goal.id, e.target.value)
                           }
-                          className="w-28 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                          placeholder="Enter value"
+                          className="w-32 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+                          placeholder={goal.uom === "TIMELINE" ? "YYYY-MM-DD" : "Enter value"}
+                          disabled={getQuarterState(activeQuarter as Quarter) !== "ACTIVE"}
                         />
                       </Td>
                       <Td>
@@ -269,23 +290,12 @@ export default function QuarterlyTrackingPage() {
                         )}
                       </Td>
                       <Td>
-                        <select
-                          value={stateData?.status || "NOT_STARTED"}
-                          onChange={(e) =>
-                            handleStatusChange(
-                              goal.id,
-                              e.target.value as
-                                | "NOT_STARTED"
-                                | "ON_TRACK"
-                                | "COMPLETED"
-                            )
-                          }
-                          className="px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        >
-                          <option value="NOT_STARTED">Not Started</option>
-                          <option value="ON_TRACK">On Track</option>
-                          <option value="COMPLETED">Completed</option>
-                        </select>
+                        <div className="flex flex-col gap-1 items-start">
+                          <StatusBadge status={stateData?.status || "NOT_STARTED"} type="update" />
+                          {goal.uom === "TIMELINE" && stateData?.actualAchievement && calculateGoalProgress(goal.uom, goal.target, stateData.actualAchievement).lateCompletion && (
+                            <span className="text-[10px] bg-red-100 text-red-800 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">Late</span>
+                          )}
+                        </div>
                       </Td>
                     </Tr>
                   );
@@ -296,11 +306,24 @@ export default function QuarterlyTrackingPage() {
         </CardBody>
       </Card>
 
+      {getQuarterState(activeQuarter as Quarter) === "LOCKED_PAST" && goals.length > 0 && (
+        <div className="bg-gray-50 text-gray-800 p-4 rounded-lg text-sm border border-gray-200 flex items-center gap-2">
+          <Lock className="w-4 h-4 text-gray-500" />
+          {activeQuarter} is historical and read-only. Editing is disabled.
+        </div>
+      )}
+      {getQuarterState(activeQuarter as Quarter) === "LOCKED_FUTURE" && goals.length > 0 && (
+        <div className="bg-gray-50 text-gray-800 p-4 rounded-lg text-sm border border-gray-200 flex items-center gap-2">
+          <Lock className="w-4 h-4 text-gray-500" />
+          {getQuarterMessage(activeQuarter as Quarter)}
+        </div>
+      )}
+
       <Button
         variant="primary"
         onClick={handleSave}
         loading={saving}
-        disabled={goals.length === 0}
+        disabled={goals.length === 0 || getQuarterState(activeQuarter as Quarter) !== "ACTIVE"}
         className="flex items-center gap-2"
       >
         <RefreshCw className="w-4 h-4" />

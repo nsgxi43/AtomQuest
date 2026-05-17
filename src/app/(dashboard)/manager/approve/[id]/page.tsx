@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, CheckCircle2, Share2 } from "lucide-react";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
@@ -10,14 +10,15 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { GoalSheet, Goal } from "@/types";
 
 interface ManagerApprovePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function ManagerApprovePage({
   params,
 }: ManagerApprovePageProps) {
+  const { id } = use(params);
   const router = useRouter();
   const [goalSheet, setGoalSheet] = useState<GoalSheet | null>(null);
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -37,7 +38,7 @@ export default function ManagerApprovePage({
   useEffect(() => {
     const fetchGoalSheet = async () => {
       try {
-        const response = await fetch(`/api/goal-sheets/${params.id}`);
+        const response = await fetch(`/api/goal-sheets/${id}`);
         const data = await response.json();
         setGoalSheet(data);
         setGoals(data.goals || []);
@@ -49,7 +50,7 @@ export default function ManagerApprovePage({
     };
 
     fetchGoalSheet();
-  }, [params.id]);
+  }, [id]);
 
   // Derived: total weightage using live edit values where applicable
   const totalWeightage = goals.reduce((sum, g) => {
@@ -68,7 +69,7 @@ export default function ManagerApprovePage({
     }
     setApproving(true);
     try {
-      const response = await fetch(`/api/goal-sheets/${params.id}/approve`, {
+      const response = await fetch(`/api/goal-sheets/${id}/approve`, {
         method: "POST",
       });
 
@@ -98,7 +99,7 @@ export default function ManagerApprovePage({
 
     setReturning(true);
     try {
-      const response = await fetch(`/api/goal-sheets/${params.id}/return`, {
+      const response = await fetch(`/api/goal-sheets/${id}/return`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

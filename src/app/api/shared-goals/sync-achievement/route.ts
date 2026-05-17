@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { computeScore } from "@/lib/utils";
+import { calculateGoalProgress } from "@/lib/utils";
+import { canEditQuarter } from "@/lib/cycle";
 
 /**
  * POST /api/shared-goals/sync-achievement
@@ -15,8 +16,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { sharedGoalId, quarter, actualAchievement, status } =
+    const { sharedGoalId, quarter, actualAchievement } =
       await request.json();
+
+    if (!canEditQuarter(quarter, (session.user as any).role)) {
+      return NextResponse.json(
+        { error: `The check-in window for ${quarter} is currently closed.` },
+        { status: 403 }
+      );
+    }
 
     // Get the shared goal
     const sharedGoal = await prisma.sharedGoal.findUnique({
@@ -37,9 +45,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Compute score once
-    const score = actualAchievement
-      ? computeScore(sharedGoal.uom, sharedGoal.target, actualAchievement)
-      : 0;
+    const { score, status: normalizedStatus } = calculateGoalProgress(sharedGoal.uom, sharedGoal.target, actualAchievement);
 
     // Update or create quarterly update for each linked goal
     const updates = await Promise.all(
@@ -55,12 +61,12 @@ export async function POST(request: NextRequest) {
             goalId: goal.id,
             quarter,
             actualAchievement,
-            status,
+            status: normalizedStatus as any,
             computedScore: score,
           },
           update: {
             actualAchievement,
-            status,
+            status: normalizedStatus as any,
             computedScore: score,
           },
         })
@@ -75,7 +81,7 @@ export async function POST(request: NextRequest) {
         changedById: (session.user as any).id,
         changeDescription: `Achievement synced to ${linkedGoals.length} linked goals`,
         oldValue: quarter,
-        newValue: `${actualAchievement} (${status})`,
+        newValue: `${actualAchievement} (${normalizedStatus})${calculateGoalProgress(sharedGoal.uom, sharedGoal.target, actualAchievement).lateCompletion ? " [LATE]" : ""}`,
       },
     });
 

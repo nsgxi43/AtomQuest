@@ -6,6 +6,9 @@ import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/Table";
 import { Badge } from "@/components/ui/Badge";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { calculateGoalProgress } from "@/lib/utils";
+import { getCycleStatus } from "@/lib/cycle";
 
 interface ReportRow {
   employeeId: string;
@@ -21,7 +24,7 @@ interface ReportRow {
   quarter: string;
   actual: string;
   score: number;
-  status: "NOT_STARTED" | "ON_TRACK" | "COMPLETED";
+  status: "NOT_STARTED" | "ON_TRACK" | "COMPLETED" | "DELAYED" | "AT_RISK";
   cycleYear: number;
 }
 
@@ -39,17 +42,7 @@ interface DashboardStats {
   >;
 }
 
-const STATUS_COLOR: Record<string, string> = {
-  COMPLETED: "bg-green-100 text-green-800",
-  ON_TRACK: "bg-blue-100 text-blue-800",
-  NOT_STARTED: "bg-gray-100 text-gray-600",
-};
 
-const STATUS_LABEL: Record<string, string> = {
-  COMPLETED: "Completed",
-  ON_TRACK: "On Track",
-  NOT_STARTED: "Not Started",
-};
 
 export default function ReportsPage() {
   const [rows, setRows] = useState<ReportRow[]>([]);
@@ -116,7 +109,7 @@ export default function ReportsPage() {
         r.quarter,
         r.actual,
         r.score.toFixed(1),
-        STATUS_LABEL[r.status] ?? r.status,
+        r.status.replace("_", " ").toLowerCase().replace(/\b\w/g, l => l.toUpperCase()),
         r.cycleYear,
         r.isShared ? "Yes" : "No",
       ]),
@@ -150,6 +143,9 @@ export default function ReportsPage() {
           <p className="text-gray-600 mt-1">
             Real-time achievement and completion metrics
           </p>
+          <div className="mt-3 inline-block bg-blue-50 text-blue-800 px-3 py-1.5 rounded-md text-sm font-medium border border-blue-100">
+            Current Cycle: {getCycleStatus().activeQuarter || "No Active Quarter"} — {getCycleStatus().message}
+          </div>
         </div>
         <Button
           variant="secondary"
@@ -378,11 +374,12 @@ export default function ReportsPage() {
                         </div>
                       </Td>
                       <Td>
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLOR[row.status] || "bg-gray-100 text-gray-600"}`}
-                        >
-                          {STATUS_LABEL[row.status] ?? row.status}
-                        </span>
+                        <div className="flex flex-col gap-1 items-start">
+                          <StatusBadge status={row.status} type="update" />
+                          {row.uom === "TIMELINE" && row.actual && calculateGoalProgress(row.uom, row.target, row.actual).lateCompletion && (
+                            <span className="text-[10px] bg-red-100 text-red-800 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">Late</span>
+                          )}
+                        </div>
                       </Td>
                     </Tr>
                   ))}

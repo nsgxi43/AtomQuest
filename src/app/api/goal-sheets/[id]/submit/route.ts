@@ -57,6 +57,18 @@ export async function POST(
       include: { goals: true, employee: true },
     });
 
+    // Audit log
+    await prisma.auditLog.create({
+      data: {
+        entityType: "GoalSheet",
+        entityId: id,
+        changedById: (session.user as any).id,
+        changeDescription: "Goal sheet submitted for review",
+        oldValue: goalSheet.status,
+        newValue: "SUBMITTED",
+      },
+    });
+
     return NextResponse.json(updated);
   } catch (error: any) {
     console.error("Error submitting goal sheet:", error);

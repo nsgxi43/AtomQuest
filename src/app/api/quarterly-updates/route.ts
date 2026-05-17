@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { computeScore } from "@/lib/utils";
+import { calculateGoalProgress } from "@/lib/utils";
+import { canEditQuarter } from "@/lib/cycle";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +12,14 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    const { goalId, quarter, actualAchievement, status } = data;
+    const { goalId, quarter, actualAchievement } = data;
+
+    if (!canEditQuarter(quarter, (session.user as any).role)) {
+      return NextResponse.json(
+        { error: `The check-in window for ${quarter} is currently closed.` },
+        { status: 403 }
+      );
+    }
 
     const goal = await prisma.goal.findUnique({
       where: { id: goalId },
@@ -27,10 +35,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Compute score
-    const score = actualAchievement
-      ? computeScore(goal.uom, goal.target, actualAchievement)
-      : 0;
+    // Calculate integrated score & status
+    const { score, status: normalizedStatus } = calculateGoalProgress(goal.uom, goal.target, actualAchievement);
 
     const update = await prisma.quarterlyUpdate.upsert({
       where: {
@@ -43,13 +49,25 @@ export async function POST(request: NextRequest) {
         goalId,
         quarter,
         actualAchievement,
-        status,
+        status: normalizedStatus as any,
         computedScore: score,
       },
       update: {
         actualAchievement,
-        status,
+        status: normalizedStatus as any,
         computedScore: score,
+      },
+    });
+
+    // Audit log
+    await prisma.auditLog.create({
+      data: {
+        entityType: "QuarterlyUpdate",
+        entityId: update.id,
+        changedById: (session.user as any).id,
+        changeDescription: `Quarterly progress updated for ${quarter}`,
+        oldValue: null,
+        newValue: `actual: ${actualAchievement}, status: ${normalizedStatus}, score: ${score.toFixed(1)}${calculateGoalProgress(goal.uom, goal.target, actualAchievement).lateCompletion ? ", lateCompletion: true" : ""}`,
       },
     });
 
@@ -70,17 +88,33 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const updates = await prisma.quarterlyUpdate.findMany({
-      where: {
+    const { searchParams } = new URL(request.url);
+    const goalSheetId = searchParams.get("goalSheetId");
+    const userRole = (session.user as any).role;
+
+    // Build the where clause
+    let where: any = {};
+
+    if (goalSheetId) {
+      // Manager fetching updates for a specific employee's goal sheet
+      if (userRole !== "MANAGER" && userRole !== "ADMIN") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      where = { goal: { goalSheetId } };
+    } else {
+      // Employee fetching their own updates
+      where = {
         goal: {
           goalSheet: {
             employeeId: (session.user as any).id,
           },
         },
-      },
-      include: {
-        goal: true,
-      },
+      };
+    }
+
+    const updates = await prisma.quarterlyUpdate.findMany({
+      where,
+      include: { goal: true },
     });
 
     return NextResponse.json(updates);
