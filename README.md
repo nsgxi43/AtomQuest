@@ -389,9 +389,10 @@ Explore the team dashboard, goal creation interface, shared goals, and analytics
 
 Create a goal titled "Reduce Customer Complaints" with a target of 95, assigned to Priya, Rahul, and Ananya.
 
-**Step 3 — Switch to Employee**
+**Step 3 — Login as Employee**
 
-Use the Demo Navigation Widget to open employee dashboards, submit quarterly updates, and observe KPI progression.
+Explore employee dashboards and submit quarterly updates.
+Use the Demo Navigation Widget to quickly traverse quarterly lifecycle views (Q1 → Q4) during evaluation.
 
 **Step 4 — Observe Analytics**
 
