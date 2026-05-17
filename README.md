@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚛️ AtomQuest
+# AtomQuest
 
 ### Enterprise KPI Governance & Performance Intelligence Platform
 
@@ -16,7 +16,7 @@
 
 ---
 
-## 🏛️ What Is AtomQuest?
+## What Is AtomQuest?
 
 AtomQuest is a **production-deployed enterprise governance platform** that simulates how modern organizations manage KPI performance, quarterly review cycles, organizational accountability, and governance compliance — all through a structured, role-governed system.
 
@@ -26,7 +26,7 @@ It is not a CRUD demonstration. AtomQuest models the actual operational mechanic
 
 ---
 
-## 🎯 The Enterprise Problem
+## The Enterprise Problem
 
 Most organizations struggle with a predictable set of performance governance failures:
 
@@ -44,7 +44,7 @@ AtomQuest addresses each of these with a purpose-built system: structured data m
 
 ---
 
-## 🏗️ Architecture Philosophy
+## Architecture Philosophy
 
 AtomQuest is built on three architectural principles:
 
@@ -59,7 +59,7 @@ The platform is seeded with realistic organizational data — two managers, six 
 
 ---
 
-## 🧱 System Architecture
+## System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -97,7 +97,7 @@ The platform is seeded with realistic organizational data — two managers, six 
 
 ---
 
-## 🗃️ Database Schema Design
+## Database Schema Design
 
 The data model reflects genuine performance governance structure:
 
@@ -124,7 +124,7 @@ AuditLog        (changedBy → entityType + entityId + oldValue + newValue)
 
 ---
 
-## 📦 Repository Structure
+## Repository Structure
 
 ```
 atomquest/
@@ -176,7 +176,7 @@ atomquest/
 
 ---
 
-## 🔐 Authentication & RBAC
+## Authentication & RBAC
 
 ### Authentication
 NextAuth credentials provider with `bcryptjs` password hashing. Sessions are JWT-based and validated server-side on every protected API route and server component.
@@ -203,7 +203,7 @@ Role enforcement is applied at the API layer, not just UI. Every API route valid
 
 ---
 
-## 📋 Goal Sheet Lifecycle
+## Goal Sheet Lifecycle
 
 Every employee operates within a structured goal sheet workflow:
 
@@ -229,7 +229,7 @@ Each transition is timestamped (`submittedAt`, `approvedAt`, `lockedAt`) and log
 
 ---
 
-## 🎯 Goal Mathematics
+## Goal Mathematics
 
 ### Unit of Measure (UoM) Types
 
@@ -275,7 +275,7 @@ Any deviation is detected by the escalation engine (Rule ESC-RULE-004) and surfa
 
 ---
 
-## 🔗 Shared Goals & Collaborative KPIs
+## Shared Goals & Collaborative KPIs
 
 AtomQuest supports the enterprise pattern of **shared KPI ownership** — where a single organizational target spans multiple employees or teams.
 
@@ -297,7 +297,7 @@ Each participating employee has a `Goal` record in their own `GoalSheet` that re
 
 ---
 
-## ⚡ Escalation Engine
+## Escalation Engine
 
 The escalation engine (`/api/escalations`) is a **rule-based governance processor** that evaluates live database state against configurable SLA thresholds and emits structured escalation records with severity classification, timeline stages, risk scores, and compliance metadata.
 
@@ -363,7 +363,7 @@ Each escalation record includes:
 
 ---
 
-## 📊 Analytics Architecture
+## Analytics Architecture
 
 The analytics layer aggregates cross-entity governance data into dashboard metrics:
 
@@ -376,7 +376,7 @@ Analytics endpoints respect role scoping: managers see only their direct reports
 
 ---
 
-## 📑 Audit System
+## Audit System
 
 Every significant state change is persisted to the `AuditLog` table:
 
@@ -402,7 +402,7 @@ Admin dashboard surfaces audit logs with filtering by entity type, user, and tim
 
 ---
 
-## 🎛️ Demo Navigation Widget
+## Demo Navigation Widget
 
 The floating `DemoSwitcher` widget is an **evaluator assistance utility** — not a role switcher, not an authentication bypass.
 
@@ -422,7 +422,7 @@ This design means an evaluator logged in as `manager@demo.com` can traverse Q1 t
 
 ---
 
-## 🚀 Production Deployment
+## Production Deployment
 
 | Layer | Technology | Notes |
 |---|---|---|
@@ -437,7 +437,7 @@ This design means an evaluator logged in as `manager@demo.com` can traverse Q1 t
 
 ---
 
-## 🔑 Demo Access Credentials
+## Demo Access Credentials
 
 All accounts share the password: **`password123`**
 
@@ -466,7 +466,7 @@ All accounts share the password: **`password123`**
 
 ---
 
-## 🧭 Recommended Evaluator Walkthrough
+## Recommended Evaluator Walkthrough
 
 ### Pass 1 — Admin Governance Overview (5 min)
 
@@ -499,7 +499,7 @@ All accounts share the password: **`password123`**
 
 ---
 
-## 🛠️ Local Development
+## Local Development
 
 ### Prerequisites
 - Node.js 20+
@@ -532,7 +532,7 @@ Open [http://localhost:3000](http://localhost:3000) and log in with any demo cre
 
 ---
 
-## 🗺️ Future Roadmap
+## Future Roadmap
 
 | Capability | Description |
 |---|---|
@@ -547,7 +547,7 @@ Open [http://localhost:3000](http://localhost:3000) and log in with any demo cre
 
 ---
 
-## 🏆 Why AtomQuest Stands Apart
+## Why AtomQuest Stands Apart
 
 Most portfolio projects demonstrate the ability to build forms and query a database. AtomQuest demonstrates something harder: the ability to **model organizational systems**.
 
