@@ -9,11 +9,13 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/employee") ||
     pathname.startsWith("/manager") ||
     pathname.startsWith("/admin") ||
-    pathname.startsWith("/reports")
+    pathname.startsWith("/reports") ||
+    pathname.startsWith("/shared-goals")
   ) {
     // Check for auth session in cookies
-    const sessionToken = request.cookies.get("next-auth.session-token")?.value ||
-                        request.cookies.get("__Secure-next-auth.session-token")?.value;
+    const sessionToken =
+      request.cookies.get("next-auth.session-token")?.value ||
+      request.cookies.get("__Secure-next-auth.session-token")?.value;
 
     // If no session token, redirect to login
     if (!sessionToken) {
@@ -30,5 +32,6 @@ export const config = {
     "/manager/:path*",
     "/admin/:path*",
     "/reports/:path*",
+    "/shared-goals/:path*",
   ],
 };

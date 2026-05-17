@@ -1,42 +1,58 @@
 "use client";
 
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { RefreshCw, Share2 } from "lucide-react";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/Table";
 import { ScoreBar } from "@/components/ui/ScoreBar";
 import { Goal, QuarterlyUpdate } from "@/types";
 
-type UpdateState = Record<string, { actualAchievement: string; status: "NOT_STARTED" | "ON_TRACK" | "COMPLETED" }>;
+type UpdateState = Record<
+  string,
+  {
+    actualAchievement: string;
+    status: "NOT_STARTED" | "ON_TRACK" | "COMPLETED";
+  }
+>;
 
 export default function QuarterlyTrackingPage() {
   const { data: session } = useSession();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [updates, setUpdates] = useState<QuarterlyUpdate[]>([]);
-  const [activeQuarter, setActiveQuarter] = useState<"Q1" | "Q2" | "Q3" | "Q4">("Q1");
+  const [activeQuarter, setActiveQuarter] = useState<
+    "Q1" | "Q2" | "Q3" | "Q4"
+  >("Q1");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [syncing, setSyncing] = useState<string | null>(null);
   const [updateState, setUpdateState] = useState<UpdateState>({});
   const quarters: ("Q1" | "Q2" | "Q3" | "Q4")[] = ["Q1", "Q2", "Q3", "Q4"];
+
+  const fetchUpdates = async () => {
+    const updatesRes = await fetch("/api/quarterly-updates");
+    const updatesData = await updatesRes.json();
+    return updatesData || [];
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const goalsRes = await fetch("/api/goals");
         const goalsData = await goalsRes.json();
-        setGoals(goalsData.goals || []);
+        const goalsList: Goal[] = goalsData.goals || [];
+        setGoals(goalsList);
 
-        const updatesRes = await fetch("/api/quarterly-updates");
-        const updatesData = await updatesRes.json();
-        setUpdates(updatesData || []);
+        const updatesData = await fetchUpdates();
+        setUpdates(updatesData);
 
-        // Initialize updateState from fetched data
+        // Initialize updateState from persisted data for active quarter
         const state: UpdateState = {};
-        (goalsData.goals || []).forEach((goal: Goal) => {
-          const update = (updatesData || []).find(
-            (u: QuarterlyUpdate) => u.goalId === goal.id
+        goalsList.forEach((goal: Goal) => {
+          const update = updatesData.find(
+            (u: QuarterlyUpdate) =>
+              u.goalId === goal.id && u.quarter === activeQuarter
           );
           state[goal.id] = {
             actualAchievement: update?.actualAchievement || "",
@@ -52,7 +68,23 @@ export default function QuarterlyTrackingPage() {
     };
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // When quarter changes, re-initialise the form state from saved updates
+  useEffect(() => {
+    const state: UpdateState = {};
+    goals.forEach((goal) => {
+      const update = updates.find(
+        (u) => u.goalId === goal.id && u.quarter === activeQuarter
+      );
+      state[goal.id] = {
+        actualAchievement: update?.actualAchievement || "",
+        status: update?.status || "NOT_STARTED",
+      };
+    });
+    setUpdateState(state);
+  }, [activeQuarter, updates, goals]);
 
   const handleActualChange = (goalId: string, value: string) => {
     setUpdateState((prev) => ({
@@ -77,33 +109,61 @@ export default function QuarterlyTrackingPage() {
     }));
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const updates = Object.entries(updateState).map(([goalId, data]) =>
-        fetch("/api/quarterly-updates", {
+  /**
+   * Save a single goal's update.
+   * If the goal is a shared goal, also trigger sync across all linked goals.
+   */
+  const saveSingleGoal = async (goal: Goal) => {
+    const data = updateState[goal.id];
+    const res = await fetch("/api/quarterly-updates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        goalId: goal.id,
+        quarter: activeQuarter,
+        actualAchievement: data.actualAchievement,
+        status: data.status,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Failed to save update");
+    }
+
+    // If shared goal, sync achievement to all linked employee goals
+    if (goal.isShared && goal.sharedFromId) {
+      setSyncing(goal.id);
+      try {
+        await fetch("/api/shared-goals/sync-achievement", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            goalId,
+            sharedGoalId: goal.sharedFromId,
             quarter: activeQuarter,
             actualAchievement: data.actualAchievement,
             status: data.status,
           }),
-        })
-      );
+        });
+      } finally {
+        setSyncing(null);
+      }
+    }
 
-      const results = await Promise.all(updates);
-      const hasErrors = results.some((res) => !res.ok);
+    return res.json();
+  };
 
-      if (hasErrors) {
-        alert("Some updates failed. Please try again.");
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const results = await Promise.allSettled(goals.map(saveSingleGoal));
+      const failed = results.filter((r) => r.status === "rejected");
+      if (failed.length > 0) {
+        alert(`${failed.length} update(s) failed. Please try again.`);
       } else {
         alert("All updates saved successfully!");
-        // Refresh data
-        const updatesRes = await fetch("/api/quarterly-updates");
-        const updatesData = await updatesRes.json();
-        setUpdates(updatesData || []);
+        const updatesData = await fetchUpdates();
+        setUpdates(updatesData);
       }
     } catch (error) {
       console.error("Error saving updates:", error);
@@ -114,7 +174,11 @@ export default function QuarterlyTrackingPage() {
   };
 
   if (loading) {
-    return <div className="p-6">Loading...</div>;
+    return (
+      <div className="p-6 flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+      </div>
+    );
   }
 
   return (
@@ -124,7 +188,7 @@ export default function QuarterlyTrackingPage() {
         <p className="text-gray-600 mt-1">Track goal progress by quarter</p>
       </div>
 
-      <div className="flex gap-2 bg-white p-4 rounded-lg">
+      <div className="flex gap-2 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
         {quarters.map((q) => (
           <Button
             key={q}
@@ -142,65 +206,93 @@ export default function QuarterlyTrackingPage() {
           <h2 className="text-lg font-semibold">{activeQuarter} Progress</h2>
         </CardHeader>
         <CardBody>
-          <Table>
-            <Thead>
-              <Tr>
-                <Th>Goal</Th>
-                <Th>Target</Th>
-                <Th>Actual</Th>
-                <Th>Score</Th>
-                <Th>Status</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {goals.map((goal) => {
-                const stateData = updateState[goal.id];
-                const update = updates.find(
-                  (u) => u.goalId === goal.id && u.quarter === activeQuarter
-                );
-                return (
-                  <Tr key={goal.id}>
-                    <Td>{goal.title}</Td>
-                    <Td>{goal.target}</Td>
-                    <Td>
-                      <input
-                        type="text"
-                        value={stateData?.actualAchievement || ""}
-                        onChange={(e) =>
-                          handleActualChange(goal.id, e.target.value)
-                        }
-                        className="w-24 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter value"
-                      />
-                    </Td>
-                    <Td>
-                      {update?.computedScore ? (
-                        <ScoreBar score={update.computedScore} />
-                      ) : (
-                        <span className="text-gray-500">-</span>
-                      )}
-                    </Td>
-                    <Td>
-                      <select
-                        value={stateData?.status || "NOT_STARTED"}
-                        onChange={(e) =>
-                          handleStatusChange(
-                            goal.id,
-                            e.target.value as "NOT_STARTED" | "ON_TRACK" | "COMPLETED"
-                          )
-                        }
-                        className="px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="NOT_STARTED">Not Started</option>
-                        <option value="ON_TRACK">On Track</option>
-                        <option value="COMPLETED">Completed</option>
-                      </select>
-                    </Td>
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
+          {goals.length === 0 ? (
+            <p className="text-gray-500 py-6 text-center">
+              No approved goals to track. Goals appear here after your goal
+              sheet is approved.
+            </p>
+          ) : (
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th>Goal</Th>
+                  <Th>Target</Th>
+                  <Th>Actual</Th>
+                  <Th>Score</Th>
+                  <Th>Status</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {goals.map((goal) => {
+                  const stateData = updateState[goal.id];
+                  const update = updates.find(
+                    (u) =>
+                      u.goalId === goal.id && u.quarter === activeQuarter
+                  );
+                  return (
+                    <Tr key={goal.id}>
+                      <Td>
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {goal.title}
+                          </p>
+                          {goal.isShared && (
+                            <span className="inline-flex items-center gap-1 text-xs text-purple-600 mt-0.5">
+                              <Share2 className="w-3 h-3" />
+                              Shared
+                              {syncing === goal.id && (
+                                <span className="ml-1 text-blue-500">
+                                  (syncing…)
+                                </span>
+                              )}
+                            </span>
+                          )}
+                        </div>
+                      </Td>
+                      <Td>{goal.target}</Td>
+                      <Td>
+                        <input
+                          type="text"
+                          value={stateData?.actualAchievement || ""}
+                          onChange={(e) =>
+                            handleActualChange(goal.id, e.target.value)
+                          }
+                          className="w-28 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          placeholder="Enter value"
+                        />
+                      </Td>
+                      <Td>
+                        {update?.computedScore != null ? (
+                          <ScoreBar score={update.computedScore} />
+                        ) : (
+                          <span className="text-gray-400 text-sm">-</span>
+                        )}
+                      </Td>
+                      <Td>
+                        <select
+                          value={stateData?.status || "NOT_STARTED"}
+                          onChange={(e) =>
+                            handleStatusChange(
+                              goal.id,
+                              e.target.value as
+                                | "NOT_STARTED"
+                                | "ON_TRACK"
+                                | "COMPLETED"
+                            )
+                          }
+                          className="px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        >
+                          <option value="NOT_STARTED">Not Started</option>
+                          <option value="ON_TRACK">On Track</option>
+                          <option value="COMPLETED">Completed</option>
+                        </select>
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
+          )}
         </CardBody>
       </Card>
 
@@ -209,8 +301,15 @@ export default function QuarterlyTrackingPage() {
         onClick={handleSave}
         loading={saving}
         disabled={goals.length === 0}
+        className="flex items-center gap-2"
       >
+        <RefreshCw className="w-4 h-4" />
         Save Progress
+        {goals.some((g) => g.isShared) && (
+          <span className="text-xs opacity-75 ml-1">
+            (shared goals will sync)
+          </span>
+        )}
       </Button>
     </div>
   );

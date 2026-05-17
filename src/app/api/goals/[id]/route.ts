@@ -97,15 +97,51 @@ export async function PATCH(
 
     const data = await request.json();
 
+    // Shared goal restriction: employees can ONLY update weightage
+    if (goal.isShared) {
+      if (
+        data.title !== undefined ||
+        data.description !== undefined ||
+        data.thrustArea !== undefined ||
+        data.uom !== undefined ||
+        data.target !== undefined
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Shared goal: only weightage can be modified by the employee",
+          },
+          { status: 403 }
+        );
+      }
+
+      // Validate weightage
+      if (data.weightage !== undefined) {
+        const w = parseFloat(data.weightage);
+        if (isNaN(w) || w < 10 || w > 100) {
+          return NextResponse.json(
+            { error: "Weightage must be between 10 and 100" },
+            { status: 400 }
+          );
+        }
+      }
+
+      const updated = await prisma.goal.update({
+        where: { id },
+        data: { weightage: data.weightage ?? goal.weightage },
+      });
+      return NextResponse.json(updated);
+    }
+
     const updated = await prisma.goal.update({
       where: { id },
       data: {
-        title: data.title || goal.title,
-        description: data.description || goal.description,
-        thrustArea: data.thrustArea || goal.thrustArea,
-        uom: data.uom || goal.uom,
-        target: data.target || goal.target,
-        weightage: data.weightage || goal.weightage,
+        title: data.title ?? goal.title,
+        description: data.description ?? goal.description,
+        thrustArea: data.thrustArea ?? goal.thrustArea,
+        uom: data.uom ?? goal.uom,
+        target: data.target ?? goal.target,
+        weightage: data.weightage ?? goal.weightage,
       },
     });
 

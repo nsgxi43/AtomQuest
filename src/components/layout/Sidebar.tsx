@@ -10,6 +10,7 @@ import {
   FileText,
   LogOut,
   BarChart3,
+  Share2,
 } from "lucide-react";
 import { Button } from "../ui/Button";
 import { signOut } from "next-auth/react";
@@ -44,6 +45,11 @@ export function Sidebar() {
       href: "/admin/audit",
       label: "Audit",
       icon: FileText,
+    },
+    (role === "MANAGER" || role === "ADMIN") && {
+      href: "/shared-goals",
+      label: "Shared Goals",
+      icon: Share2,
     },
     role === "MANAGER" || role === "ADMIN"
       ? { href: "/reports", label: "Reports", icon: BarChart3 }
