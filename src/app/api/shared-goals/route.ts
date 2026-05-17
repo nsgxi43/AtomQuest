@@ -15,57 +15,93 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { title, thrustArea, target, uom, assignToEmployeeIds } =
+    const { title, thrustArea, target, uom, assignToEmployeeIds, primaryOwnerId, employeeWeightages } =
       await request.json();
 
     // Validate inputs
-    if (!title || !thrustArea || !target || !uom) {
+    if (!title || !thrustArea || !target || !uom || !primaryOwnerId || !employeeWeightages) {
       return NextResponse.json(
-        { error: "Missing required fields: title, thrustArea, target, uom" },
+        { error: "Missing required fields: title, thrustArea, target, uom, primaryOwnerId, employeeWeightages" },
         { status: 400 }
       );
     }
 
-    // Create shared goal
-    const sharedGoal = await prisma.sharedGoal.create({
-      data: {
-        title,
-        thrustArea,
-        target,
-        uom,
-        createdById: (session.user as any).id,
-      },
-    });
+    const currentYear = new Date().getFullYear();
+    const createdById = (session.user as any).id;
 
-    // Assign to employees if provided
-    if (assignToEmployeeIds && assignToEmployeeIds.length > 0) {
-      // Get all active goal sheets for these employees in current year
-      const currentYear = new Date().getFullYear();
-      const goalSheets = await prisma.goalSheet.findMany({
-        where: {
-          employeeId: { in: assignToEmployeeIds },
-          cycleYear: currentYear,
+    // Execute in a transaction for safety
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Create shared goal
+      const sharedGoal = await tx.sharedGoal.create({
+        data: {
+          title,
+          thrustArea,
+          target,
+          uom,
+          createdById,
+          primaryOwnerId,
         },
       });
 
-      // Create goals for each goal sheet
-      for (const goalSheet of goalSheets) {
-        await prisma.goal.create({
-          data: {
-            goalSheetId: goalSheet.id,
-            title,
-            thrustArea,
-            target,
-            uom,
-            weightage: 0, // Employees must set this
-            sharedFromId: sharedGoal.id,
-            isShared: true,
+      // 2. Pre-flight check: block if any existing GoalSheet is SUBMITTED or APPROVED
+      if (assignToEmployeeIds && assignToEmployeeIds.length > 0) {
+        const existingSheets = await tx.goalSheet.findMany({
+          where: {
+            employeeId: { in: assignToEmployeeIds },
+            cycleYear: currentYear,
           },
         });
-      }
-    }
 
-    return NextResponse.json(sharedGoal);
+        const blockedSheets = existingSheets.filter(
+          (s) => s.status === "SUBMITTED" || s.status === "APPROVED"
+        );
+        if (blockedSheets.length > 0) {
+          throw new Error("Cannot assign shared goals to employees with SUBMITTED or APPROVED goal sheets.");
+        }
+      }
+
+      // 3. Process each assigned employee
+      if (assignToEmployeeIds && assignToEmployeeIds.length > 0) {
+        for (const empId of assignToEmployeeIds) {
+          // Find or create GoalSheet
+          let goalSheet = await tx.goalSheet.findFirst({
+            where: {
+              employeeId: empId,
+              cycleYear: currentYear,
+            },
+          });
+
+          if (!goalSheet) {
+            goalSheet = await tx.goalSheet.create({
+              data: {
+                employeeId: empId,
+                cycleYear: currentYear,
+                status: "DRAFT",
+              },
+            });
+          }
+
+          // Create linked Goal
+          await tx.goal.create({
+            data: {
+              goalSheetId: goalSheet.id,
+              title,
+              thrustArea,
+              target,
+              uom,
+              weightage: employeeWeightages[empId] || 0,
+              sharedFromId: sharedGoal.id,
+              isShared: true,
+              isPrimaryOwner: empId === primaryOwnerId,
+            },
+          });
+        }
+      }
+
+      return sharedGoal;
+    });
+
+    return NextResponse.json(result);
   } catch (error: any) {
     console.error("Error creating shared goal:", error);
     return NextResponse.json(

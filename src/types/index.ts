@@ -18,6 +18,7 @@ export interface Goal {
   target: string;
   weightage: number;
   isShared: boolean;
+  isPrimaryOwner?: boolean;
   sharedFromId?: string | null;
   createdAt: Date;
   updatedAt: Date;

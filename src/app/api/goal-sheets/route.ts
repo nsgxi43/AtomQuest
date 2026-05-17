@@ -9,19 +9,39 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get current user's goal sheets
+    const currentYear = new Date().getFullYear();
     const goalSheets = await prisma.goalSheet.findMany({
       where: {
         employeeId: (session.user as any).id,
+        cycleYear: currentYear,
       },
       include: {
         goals: true,
         employee: true,
       },
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
 
     // Return the first goal sheet (current cycle) or the latest one
-    const goalSheet = goalSheets[0] || null;
+    let goalSheet = goalSheets[0] || null;
+
+    if (!goalSheet) {
+      // Auto-create for the current year if it doesn't exist
+      goalSheet = await prisma.goalSheet.create({
+        data: {
+          employeeId: (session.user as any).id,
+          cycleYear: currentYear,
+          status: "DRAFT",
+        },
+        include: {
+          goals: true,
+          employee: true,
+        },
+      });
+    }
+
     const goals = goalSheet?.goals || [];
 
     return NextResponse.json({ goalSheet, goals });

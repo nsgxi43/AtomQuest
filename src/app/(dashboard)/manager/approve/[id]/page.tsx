@@ -288,10 +288,15 @@ export default function ManagerApprovePage({
                   <Td>
                     <div>
                       <p className="font-medium text-gray-900">{goal.title}</p>
-                      {goal.isShared && (
-                        <span className="inline-flex items-center gap-1 text-xs text-purple-600 mt-0.5">
+                      {goal.isShared && goal.sharedFromId && (
+                        <span className="inline-flex items-center gap-1 text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full ml-2">
                           <Share2 className="w-3 h-3" />
                           Shared
+                        </span>
+                      )}
+                      {goal.isShared && !goal.sharedFromId && (
+                        <span className="inline-flex items-center gap-1 text-xs bg-gray-50 text-gray-500 border border-gray-200 px-2 py-0.5 rounded-full ml-2">
+                          Archived Shared
                         </span>
                       )}
                     </div>

@@ -36,9 +36,14 @@ export async function DELETE(
       );
     }
 
-    await prisma.goal.delete({
-      where: { id },
-    });
+    await prisma.$transaction([
+      prisma.quarterlyUpdate.deleteMany({
+        where: { goalId: id },
+      }),
+      prisma.goal.delete({
+        where: { id },
+      }),
+    ]);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { calculateGoalProgress } from "@/lib/utils";
 import { canEditQuarter } from "@/lib/cycle";
 import { getEffectiveDateFromQuarter } from "@/lib/cycle-client";
+import { syncSharedGoalUpdates } from "@/lib/sync";
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,11 +28,29 @@ export async function POST(request: NextRequest) {
 
     const goal = await prisma.goal.findUnique({
       where: { id: goalId },
-      include: { goalSheet: true },
+      include: { sharedGoal: true, goalSheet: true },
     });
 
     if (!goal) {
       return NextResponse.json({ error: "Goal not found" }, { status: 404 });
+    }
+
+    if (goal.isShared && !goal.isPrimaryOwner) {
+      // Audit log the violation attempt
+      await prisma.auditLog.create({
+        data: {
+          entityType: "QuarterlyUpdate_Violation",
+          entityId: goalId,
+          changedById: (session.user as any).id,
+          changeDescription: `Recipient attempted restricted shared KPI modification for quarter ${quarter}`,
+          newValue: actualAchievement,
+        },
+      });
+
+      return NextResponse.json(
+        { error: "Recipients cannot modify shared KPI achievements. Managed by Primary Owner." },
+        { status: 403 }
+      );
     }
 
     // Verify ownership
@@ -74,6 +93,8 @@ export async function POST(request: NextRequest) {
         newValue: `actual: ${actualAchievement}, status: ${normalizedStatus}, score: ${score.toFixed(1)}${calculateGoalProgress(goal.uom, goal.target, actualAchievement).lateCompletion ? ", lateCompletion: true" : ""}`,
       },
     });
+
+    await syncSharedGoalUpdates(goalId, quarter, actualAchievement, (session.user as any).id);
 
     return NextResponse.json(update);
   } catch (error: any) {

@@ -41,6 +41,13 @@ interface DashboardStats {
     string,
     { completed: number; onTrack: number; notStarted: number }
   >;
+  pendingEmployees: {
+    id: string;
+    name: string;
+    email: string;
+    status: string;
+    goalCount: number;
+  }[];
 }
 
 
@@ -252,6 +259,65 @@ export default function ReportsPage() {
               );
             })}
           </div>
+
+          {/* Pending Employees Widget */}
+          {stats.pendingEmployees && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Employees Pending Submission ({stats.pendingEmployees.length} Employees)
+                  </h3>
+                  <div className="text-sm text-gray-500 font-medium">
+                    {stats.totalEmployees > 0 
+                      ? `${Math.round((stats.submitted / stats.totalEmployees) * 100)}% submission completion`
+                      : '0% submission completion'}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardBody className="p-0 overflow-x-auto">
+                {stats.pendingEmployees.length === 0 ? (
+                  <div className="p-6 text-center text-green-600 font-medium bg-green-50/50 rounded-b-lg">
+                    All employees have submitted their goal sheets.
+                  </div>
+                ) : (
+                  <Table>
+                    <Thead>
+                      <Tr>
+                        <Th>Employee</Th>
+                        <Th>Goals Drafted</Th>
+                        <Th>Status</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {stats.pendingEmployees.map((emp) => (
+                        <Tr key={emp.id}>
+                          <Td>
+                            <div>
+                              <p className="font-medium text-gray-900">{emp.name}</p>
+                              <p className="text-xs text-gray-500">{emp.email}</p>
+                            </div>
+                          </Td>
+                          <Td>
+                            <span className="text-gray-700 font-medium">{emp.goalCount}</span>
+                          </Td>
+                          <Td>
+                            {emp.status === "RETURNED" ? (
+                              <Badge variant="returned">Returned for Revision</Badge>
+                            ) : emp.status === "DRAFT" ? (
+                              <Badge variant="draft">Drafting</Badge>
+                            ) : (
+                              <Badge variant="not-started">Not Started</Badge>
+                            )}
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                )}
+              </CardBody>
+            </Card>
+          )}
         </div>
       )}
 

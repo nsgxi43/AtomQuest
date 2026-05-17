@@ -14,15 +14,25 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    // Delete all linked goals first
-    await prisma.goal.deleteMany({
+    // Find all descendant goals
+    const descendantGoals = await prisma.goal.findMany({
       where: { sharedFromId: id },
+      select: { id: true },
     });
+    const descendantGoalIds = descendantGoals.map((g) => g.id);
 
-    // Delete the shared goal
-    const deleted = await prisma.sharedGoal.delete({
-      where: { id },
-    });
+    // Delete in a transaction to prevent constraint violations
+    const [_, __, deleted] = await prisma.$transaction([
+      prisma.quarterlyUpdate.deleteMany({
+        where: { goalId: { in: descendantGoalIds } },
+      }),
+      prisma.goal.deleteMany({
+        where: { sharedFromId: id },
+      }),
+      prisma.sharedGoal.delete({
+        where: { id },
+      }),
+    ]);
 
     // Log audit trail
     await prisma.auditLog.create({

@@ -13,10 +13,12 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     const validated = CreateGoalSchema.parse(data);
 
+    const currentYear = new Date().getFullYear();
     // Get or create goal sheet for the current user
     let goalSheet = await prisma.goalSheet.findFirst({
       where: {
         employeeId: (session.user as any).id,
+        cycleYear: currentYear,
         status: { in: ["DRAFT", "RETURNED"] },
       },
     });

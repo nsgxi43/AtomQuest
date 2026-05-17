@@ -203,22 +203,33 @@ export default function EmployeeGoalPage() {
                       <h3 className="font-semibold text-gray-900">
                         {goal.title}
                       </h3>
-                      {goal.isShared && (
-                        <span className="inline-flex items-center gap-1 text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full">
-                          <Share2 className="w-3 h-3" />
-                          Shared
-                        </span>
-                      )}
+                        {goal.isShared && goal.sharedFromId && (
+                          <span className="inline-flex items-center gap-1 text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full">
+                            <Share2 className="w-3 h-3" />
+                            Shared
+                          </span>
+                        )}
+                        {goal.isShared && !goal.sharedFromId && (
+                          <span className="inline-flex items-center gap-1 text-xs bg-gray-50 text-gray-500 border border-gray-200 px-2 py-0.5 rounded-full">
+                            <Lock className="w-3 h-3" />
+                            Archived Shared Goal
+                          </span>
+                        )}
                     </div>
                     {goal.description && (
                       <p className="text-sm text-gray-600 mt-1">
                         {goal.description}
                       </p>
                     )}
-                    {goal.isShared && (
+                    {goal.isShared && goal.sharedFromId && (
                       <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-2 py-1 rounded mt-2 inline-block">
                         🔒 Title and target are fixed by your manager. You may
                         only edit your weightage.
+                      </p>
+                    )}
+                    {goal.isShared && !goal.sharedFromId && (
+                      <p className="text-xs text-gray-600 bg-gray-100 border border-gray-300 px-2 py-1 rounded mt-2 inline-block">
+                        This shared goal has been deleted by management but your history is preserved.
                       </p>
                     )}
                   </div>
@@ -230,7 +241,7 @@ export default function EmployeeGoalPage() {
                       <Trash2 className="w-5 h-5" />
                     </button>
                   )}
-                  {goal.isShared && (
+                  {goal.isShared && goal.sharedFromId && (
                     <Lock className="w-4 h-4 text-gray-400 ml-3 mt-0.5 shrink-0" />
                   )}
                 </div>
@@ -253,7 +264,7 @@ export default function EmployeeGoalPage() {
                   <div>
                     <p className="text-gray-600">Weightage</p>
                     {/* Shared goals: employee can edit weightage only */}
-                    {goal.isShared && canEdit ? (
+                    {goal.isShared && canEdit && goal.sharedFromId ? (
                       editingWeightageId === goal.id ? (
                         <div className="flex items-center gap-2 mt-1">
                           <input
@@ -313,6 +324,7 @@ export default function EmployeeGoalPage() {
           <Button
             variant="primary"
             loading={submitting}
+            disabled={Math.abs(totalWeightage - 100) >= 0.01}
             onClick={handleSubmitGoalSheet}
             className="flex-1"
           >

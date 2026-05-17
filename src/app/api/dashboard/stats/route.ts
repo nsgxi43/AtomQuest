@@ -25,14 +25,17 @@ export async function GET(request: NextRequest) {
         ? { managerId: (session.user as any).id }
         : {};
 
+    const currentYear = new Date().getFullYear();
+
     const totalEmployees = await prisma.user.count({
       where: { role: "EMPLOYEE", ...employeeWhere },
     });
 
-    // Goal sheets by status
+    // Goal sheets by status (Active cycle only)
     const goalSheetStatusGroups = await prisma.goalSheet.groupBy({
       by: ["status"],
       where: {
+        cycleYear: currentYear,
         employee: { role: "EMPLOYEE", ...employeeWhere },
       },
       _count: { id: true },
@@ -46,8 +49,7 @@ export async function GET(request: NextRequest) {
     const submitted =
       (statusMap["SUBMITTED"] ?? 0) +
       (statusMap["APPROVED"] ?? 0) +
-      (statusMap["LOCKED"] ?? 0) +
-      (statusMap["RETURNED"] ?? 0);
+      (statusMap["LOCKED"] ?? 0);
     const approved =
       (statusMap["APPROVED"] ?? 0) + (statusMap["LOCKED"] ?? 0);
     const locked = statusMap["LOCKED"] ?? 0;
@@ -62,6 +64,7 @@ export async function GET(request: NextRequest) {
       // Count goal sheets (locked) where at least one goal has a COMPLETED update for this quarter
       const completedSheets = await prisma.goalSheet.count({
         where: {
+          cycleYear: currentYear,
           status: "LOCKED",
           employee: { role: "EMPLOYEE", ...employeeWhere },
           goals: {
@@ -76,6 +79,7 @@ export async function GET(request: NextRequest) {
 
       const onTrackSheets = await prisma.goalSheet.count({
         where: {
+          cycleYear: currentYear,
           status: "LOCKED",
           employee: { role: "EMPLOYEE", ...employeeWhere },
           goals: {
@@ -100,6 +104,7 @@ export async function GET(request: NextRequest) {
       where: {
         goal: {
           goalSheet: {
+            cycleYear: currentYear,
             status: "LOCKED",
             employee: { role: "EMPLOYEE", ...employeeWhere },
           },
@@ -111,6 +116,44 @@ export async function GET(request: NextRequest) {
 
     const avgScore = scoreAgg._avg.computedScore ?? 0;
 
+    // Fetch employees pending submission for the current cycle year
+    const allEmployees = await prisma.user.findMany({
+      where: { role: "EMPLOYEE", ...employeeWhere },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        goalSheets: {
+          where: { cycleYear: currentYear },
+          orderBy: { createdAt: "desc" },
+          include: {
+            _count: {
+              select: { goals: true }
+            }
+          }
+        }
+      }
+    });
+
+    const pendingEmployees = allEmployees
+      .map((emp) => {
+        const sheet = emp.goalSheets[0];
+        const status = sheet?.status || "NOT_STARTED";
+        const goalCount = sheet?._count.goals || 0;
+        return {
+          id: emp.id,
+          name: emp.name,
+          email: emp.email,
+          status,
+          goalCount,
+        };
+      })
+      .filter((emp) => ["DRAFT", "RETURNED", "NOT_STARTED"].includes(emp.status))
+      .sort((a, b) => {
+        const order: Record<string, number> = { RETURNED: 1, DRAFT: 2, NOT_STARTED: 3 };
+        return order[a.status] - order[b.status];
+      });
+
     return NextResponse.json({
       totalEmployees,
       submitted,
@@ -120,6 +163,7 @@ export async function GET(request: NextRequest) {
       returned,
       avgScore: Math.round(avgScore),
       quarterlyStats,
+      pendingEmployees,
     });
   } catch (error: any) {
     console.error("Error fetching dashboard stats:", error);

@@ -37,13 +37,13 @@ export function WeightageBar({
         />
       </div>
       {isOverflow && (
-        <p className="text-red-600 text-xs mt-1">
-          Weightage exceeds 100%
+        <p className="text-red-600 text-xs mt-1 font-medium">
+          Allocation exceeds 100% by {(currentWeightage - 100).toFixed(1)}%
         </p>
       )}
       {!isComplete && !isOverflow && (
-        <p className="text-gray-600 text-xs mt-1">
-          Remaining: {(100 - currentWeightage).toFixed(1)}%
+        <p className="text-amber-600 text-xs mt-1 font-medium">
+          Remaining allocation: {(100 - currentWeightage).toFixed(1)}%
         </p>
       )}
     </div>

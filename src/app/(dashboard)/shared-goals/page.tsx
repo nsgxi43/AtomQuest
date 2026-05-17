@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Plus, Trash2, Share2, Users } from "lucide-react";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
@@ -31,6 +32,7 @@ interface SharedGoalRow {
 
 export default function SharedGoalsPage() {
   const { data: session } = useSession();
+  const router = useRouter();
   const role = (session?.user as any)?.role;
 
   const [sharedGoals, setSharedGoals] = useState<SharedGoalRow[]>([]);
@@ -47,6 +49,8 @@ export default function SharedGoalsPage() {
     target: "",
     uom: "NUMERIC_MAX",
     assignToEmployeeIds: [] as string[],
+    primaryOwnerId: "",
+    employeeWeightages: {} as Record<string, number>,
   });
   const [formError, setFormError] = useState("");
 
@@ -81,12 +85,29 @@ export default function SharedGoalsPage() {
   };
 
   const toggleEmployee = (empId: string) => {
-    setForm((prev) => ({
-      ...prev,
-      assignToEmployeeIds: prev.assignToEmployeeIds.includes(empId)
+    setForm((prev) => {
+      const isSelected = prev.assignToEmployeeIds.includes(empId);
+      const newAssignees = isSelected
         ? prev.assignToEmployeeIds.filter((id) => id !== empId)
-        : [...prev.assignToEmployeeIds, empId],
-    }));
+        : [...prev.assignToEmployeeIds, empId];
+      
+      // Reset primary owner if unselected
+      const newPrimaryOwner = isSelected && prev.primaryOwnerId === empId ? "" : prev.primaryOwnerId;
+
+      const newWeightages = { ...prev.employeeWeightages };
+      if (isSelected) {
+        delete newWeightages[empId];
+      } else {
+        newWeightages[empId] = 0; // Default weightage
+      }
+
+      return {
+        ...prev,
+        assignToEmployeeIds: newAssignees,
+        primaryOwnerId: newPrimaryOwner,
+        employeeWeightages: newWeightages,
+      };
+    });
   };
 
   const handleCreate = async () => {
@@ -95,8 +116,21 @@ export default function SharedGoalsPage() {
       setFormError("Title, Thrust Area, and Target are required.");
       return;
     }
-    if (form.assignToEmployeeIds.length === 0) {
-      setFormError("Select at least one employee to assign this goal to.");
+    if (form.assignToEmployeeIds.length < 2) {
+      setFormError("Select at least two employees to assign this goal to.");
+      return;
+    }
+    if (!form.primaryOwnerId) {
+      setFormError("Select a primary owner for this shared goal.");
+      return;
+    }
+    
+    // Validate weightages
+    const hasInvalidWeightage = form.assignToEmployeeIds.some(id => 
+      form.employeeWeightages[id] === undefined || form.employeeWeightages[id] <= 0
+    );
+    if (hasInvalidWeightage) {
+      setFormError("Please enter a valid weightage (> 0) for all selected employees.");
       return;
     }
 
@@ -110,6 +144,7 @@ export default function SharedGoalsPage() {
 
       if (res.ok) {
         await fetchSharedGoals();
+        router.refresh();
         setShowForm(false);
         setForm({
           title: "",
@@ -117,6 +152,8 @@ export default function SharedGoalsPage() {
           target: "",
           uom: "NUMERIC_MAX",
           assignToEmployeeIds: [],
+          primaryOwnerId: "",
+          employeeWeightages: {},
         });
       } else {
         const err = await res.json();
@@ -266,30 +303,77 @@ export default function SharedGoalsPage() {
                 <p className="text-gray-500 text-sm">No employees found.</p>
               ) : (
                 <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
-                  {employees.map((emp) => (
-                    <label
-                      key={emp.id}
-                      className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={form.assignToEmployeeIds.includes(emp.id)}
-                        onChange={() => toggleEmployee(emp.id)}
-                        className="rounded border-gray-300 text-blue-600"
-                      />
-                      <span className="text-sm text-gray-700">
-                        {emp.name}
-                        <span className="text-gray-400 ml-1 text-xs">
-                          ({emp.email})
-                        </span>
-                      </span>
-                    </label>
-                  ))}
+                  {employees.map((emp) => {
+                    const isSelected = form.assignToEmployeeIds.includes(emp.id);
+                    return (
+                      <div key={emp.id} className="flex flex-col gap-1 p-2 rounded hover:bg-gray-50 border border-transparent hover:border-gray-100">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleEmployee(emp.id)}
+                            className="rounded border-gray-300 text-blue-600"
+                          />
+                          <span className="text-sm text-gray-700 font-medium">
+                            {emp.name}
+                          </span>
+                        </label>
+                        {isSelected && (
+                          <div className="pl-6 flex items-center gap-2">
+                            <span className="text-xs text-gray-500">Weightage:</span>
+                            <div className="relative w-20">
+                              <input
+                                type="number"
+                                min="1"
+                                max="100"
+                                value={form.employeeWeightages[emp.id] || ""}
+                                onChange={(e) => setForm(prev => ({
+                                  ...prev,
+                                  employeeWeightages: {
+                                    ...prev.employeeWeightages,
+                                    [emp.id]: parseFloat(e.target.value) || 0
+                                  }
+                                }))}
+                                className="w-full text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 pr-5"
+                                placeholder="%"
+                              />
+                              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">%</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 mt-1 mb-4">
                 {form.assignToEmployeeIds.length} employee(s) selected
               </p>
+
+              <label className="block text-sm font-medium text-gray-700 mb-2 mt-4 flex items-center gap-1">
+                <Users className="w-4 h-4" />
+                Primary KPI Owner *
+              </label>
+              {form.assignToEmployeeIds.length === 0 ? (
+                <p className="text-xs text-gray-500 italic">Select employees first to pick a primary owner.</p>
+              ) : (
+                <select
+                  value={form.primaryOwnerId}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, primaryOwnerId: e.target.value }))
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="" disabled>Select primary owner...</option>
+                  {employees
+                    .filter((emp) => form.assignToEmployeeIds.includes(emp.id))
+                    .map((emp) => (
+                      <option key={emp.id} value={emp.id}>
+                        {emp.name} ({emp.email})
+                      </option>
+                    ))}
+                </select>
+              )}
             </div>
 
             <div className="flex gap-2 pt-2">
@@ -365,12 +449,17 @@ export default function SharedGoalsPage() {
                     <Td>
                       <div className="flex flex-wrap gap-1">
                         {sg.goals && sg.goals.length > 0 ? (
-                          sg.goals.map((g) => (
+                          sg.goals.map((g: any) => (
                             <span
                               key={g.id}
-                              className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded"
+                              className={`text-xs px-2 py-0.5 rounded ${
+                                g.isPrimaryOwner
+                                  ? "bg-purple-100 text-purple-800 border border-purple-200"
+                                  : "bg-blue-50 text-blue-700"
+                              }`}
+                              title={g.isPrimaryOwner ? "Primary KPI Owner" : "Recipient"}
                             >
-                              {g.goalSheet?.employee?.name}
+                              {g.goalSheet?.employee?.name} {g.isPrimaryOwner && "⭐"}
                             </span>
                           ))
                         ) : (

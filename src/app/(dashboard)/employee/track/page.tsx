@@ -260,15 +260,22 @@ export default function QuarterlyTrackingPage() {
                             {goal.title}
                           </p>
                           {goal.isShared && (
-                            <span className="inline-flex items-center gap-1 text-xs text-purple-600 mt-0.5">
-                              <Share2 className="w-3 h-3" />
-                              Shared
+                            <div className="flex items-center gap-1 mt-1">
+                              {goal.isPrimaryOwner ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">
+                                  Primary KPI Owner
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">
+                                  Managed by Primary Owner
+                                </span>
+                              )}
                               {syncing === goal.id && (
-                                <span className="ml-1 text-blue-500">
+                                <span className="text-[10px] text-blue-500 font-medium">
                                   (syncing…)
                                 </span>
                               )}
-                            </span>
+                            </div>
                           )}
                         </div>
                       </Td>
@@ -282,7 +289,10 @@ export default function QuarterlyTrackingPage() {
                           }
                           className="w-32 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-gray-100 disabled:text-gray-500"
                           placeholder={goal.uom === "TIMELINE" ? "YYYY-MM-DD" : "Enter value"}
-                          disabled={getQuarterState(activeQuarter as Quarter, effectiveDate) !== "ACTIVE"}
+                          disabled={
+                            getQuarterState(activeQuarter as Quarter, effectiveDate) !== "ACTIVE" ||
+                            (goal.isShared && !goal.isPrimaryOwner)
+                          }
                         />
                       </Td>
                       <Td>

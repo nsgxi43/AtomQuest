@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 
-import { MessageSquare, Lock } from "lucide-react";
+import { MessageSquare, Lock, Share2 } from "lucide-react";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/ui/Table";
@@ -24,6 +24,9 @@ interface Goal {
   target: string;
   weightage: number;
   uom: string;
+  isShared: boolean;
+  isPrimaryOwner: boolean;
+  sharedFromId?: string | null;
 }
 
 interface QuarterlyUpdate {
@@ -295,7 +298,34 @@ export default function ManagerCheckInPage() {
                     return (
                       <Tr key={goal.id}>
                         <Td>
-                          <p className="font-medium text-gray-900">{goal.title}</p>
+                          <div>
+                            <p className="font-medium text-gray-900">{goal.title}</p>
+                            {goal.isShared && (
+                              <div className="flex items-center gap-1 mt-1">
+                                {goal.isPrimaryOwner ? (
+                                  <span className="inline-flex items-center gap-1 text-[10px] bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">
+                                    Primary KPI Owner
+                                  </span>
+                                ) : (
+                                  <>
+                                    {goal.sharedFromId ? (
+                                      <span className="inline-flex items-center gap-1 text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full">
+                                        <Share2 className="w-3 h-3" />
+                                        Shared
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 text-xs bg-gray-50 text-gray-500 border border-gray-200 px-2 py-0.5 rounded-full">
+                                        Archived Shared
+                                      </span>
+                                    )}
+                                    <span className="inline-flex items-center gap-1 text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">
+                                      Managed by Primary Owner
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </Td>
                         <Td>{goal.thrustArea}</Td>
                         <Td>{goal.target}</Td>

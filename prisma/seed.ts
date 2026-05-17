@@ -36,31 +36,42 @@ async function main() {
     },
   });
 
-  // Create Employee user
-  const employee = await prisma.user.create({
-    data: {
-      name: "Employee User",
-      email: "employee@demo.com",
-      password: hashedPassword,
-      role: "EMPLOYEE",
-      managerId: manager.id,
-    },
-  });
+  // Create Employee users
+  const employees = [
+    { name: "Priya Sharma", email: "priya@demo.com", dept: "Product Engineering" },
+    { name: "Rahul Verma", email: "rahul@demo.com", dept: "System Optimization" },
+    { name: "Ananya Iyer", email: "ananya@demo.com", dept: "QA Automation" },
+    { name: "Arjun Nair", email: "arjun@demo.com", dept: "Process Excellence" },
+    { name: "Sneha Reddy", email: "sneha@demo.com", dept: "Platform Reliability" },
+  ];
 
-  // Create a goal sheet for the employee
-  const goalSheet = await prisma.goalSheet.create({
-    data: {
-      employeeId: employee.id,
-      cycleYear: 2025,
-      status: "DRAFT",
-    },
-  });
+  const createdEmployees = [];
+  for (const emp of employees) {
+    const user = await prisma.user.create({
+      data: {
+        name: emp.name,
+        email: emp.email,
+        password: hashedPassword,
+        role: "EMPLOYEE",
+        managerId: manager.id,
+      },
+    });
+    createdEmployees.push(user);
+
+    // Create a goal sheet for the employee
+    await prisma.goalSheet.create({
+      data: {
+        employeeId: user.id,
+        cycleYear: 2025,
+        status: "DRAFT",
+      },
+    });
+  }
 
   console.log("Seeding completed successfully!");
-  console.log("Admin:", admin);
-  console.log("Manager:", manager);
-  console.log("Employee:", employee);
-  console.log("Goal Sheet:", goalSheet);
+  console.log("Admin:", admin.email);
+  console.log("Manager:", manager.email);
+  console.log("Employees seeded:", createdEmployees.map(e => e.email));
 }
 
 main()
