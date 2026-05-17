@@ -6,7 +6,8 @@ import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // Cast to any: @auth/prisma-adapter ships @auth/core types (v5) but we use next-auth v4 at runtime
+  adapter: PrismaAdapter(prisma) as any,
   providers: [
     Credentials({
       name: "Credentials",

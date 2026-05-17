@@ -1,13 +1,11 @@
-import { NextAuthConfig } from "next-auth";
+import type { NextAuthOptions } from "next-auth";
 
-export const authConfig = {
+export const authConfig: Partial<NextAuthOptions> = {
   providers: [],
   pages: {
     signIn: "/login",
   },
   callbacks: {
-    authorized: async ({ auth }) => {
-      return !!auth?.user;
-    },
+    // Stub — actual callbacks are in auth.ts
   },
-} satisfies NextAuthConfig;
+};

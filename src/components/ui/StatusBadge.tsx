@@ -2,36 +2,47 @@
 
 import { Badge } from "./Badge";
 
+type BadgeVariant =
+  | "draft"
+  | "submitted"
+  | "approved"
+  | "returned"
+  | "locked"
+  | "not-started"
+  | "on-track"
+  | "completed";
+
+interface StatusEntry {
+  label: string;
+  variant: BadgeVariant;
+}
+
 interface StatusBadgeProps {
   status: string;
   type?: "goal-sheet" | "update";
 }
 
+const goalSheetStatusMap: Record<string, StatusEntry> = {
+  DRAFT: { label: "Draft", variant: "draft" },
+  SUBMITTED: { label: "Submitted", variant: "submitted" },
+  APPROVED: { label: "Approved", variant: "approved" },
+  RETURNED: { label: "Returned", variant: "returned" },
+  LOCKED: { label: "Locked", variant: "locked" },
+};
+
+const updateStatusMap: Record<string, StatusEntry> = {
+  NOT_STARTED: { label: "Not Started", variant: "not-started" },
+  ON_TRACK: { label: "On Track", variant: "on-track" },
+  COMPLETED: { label: "Completed", variant: "completed" },
+};
+
 export function StatusBadge({ status, type = "goal-sheet" }: StatusBadgeProps) {
-  const goalSheetStatusMap = {
-    DRAFT: { label: "Draft", variant: "draft" as const },
-    SUBMITTED: { label: "Submitted", variant: "submitted" as const },
-    APPROVED: { label: "Approved", variant: "approved" as const },
-    RETURNED: { label: "Returned", variant: "returned" as const },
-    LOCKED: { label: "Locked", variant: "locked" as const },
+  const statusMap = type === "goal-sheet" ? goalSheetStatusMap : updateStatusMap;
+
+  const mappedStatus: StatusEntry = statusMap[status] ?? {
+    label: status,
+    variant: "draft",
   };
-
-  const updateStatusMap = {
-    NOT_STARTED: { label: "Not Started", variant: "not-started" as const },
-    ON_TRACK: { label: "On Track", variant: "on-track" as const },
-    COMPLETED: { label: "Completed", variant: "completed" as const },
-  };
-
-  const statusMap =
-    type === "goal-sheet"
-      ? goalSheetStatusMap
-      : updateStatusMap;
-
-  const mappedStatus =
-    statusMap[status as keyof typeof statusMap] || {
-      label: status,
-      variant: "draft" as const,
-    };
 
   return <Badge variant={mappedStatus.variant}>{mappedStatus.label}</Badge>;
 }

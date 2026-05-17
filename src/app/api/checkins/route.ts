@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let checkins;
+    let checkins: any[] = [];
     const userRole = (session.user as any).role;
 
     if (userRole === "MANAGER") {
