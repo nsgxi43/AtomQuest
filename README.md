@@ -1,486 +1,571 @@
-# AtomQuest
+<div align="center">
 
-**Enterprise Goal Governance & Performance Intelligence Platform**
+# ⚛️ AtomQuest
 
-> Operational Governance · KPI Intelligence · Enterprise Performance Architecture
+### Enterprise KPI Governance & Performance Intelligence Platform
 
-AtomQuest is a production-grade enterprise governance platform designed to simulate how modern organizations manage goals, quarterly reviews, KPI ownership, compliance tracking, escalation workflows, and organizational accountability across hierarchical teams.
+*Quarterly performance lifecycle · Goal sheet management · RBAC governance · Escalation intelligence · Audit traceability*
 
-**Production URL:** https://atom-quest-lake.vercel.app
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-atom--quest--lake.vercel.app-6366f1?style=for-the-badge&logo=vercel&logoColor=white)](https://atom-quest-lake.vercel.app)
+[![Next.js](https://img.shields.io/badge/Next.js-16.2.6-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Prisma](https://img.shields.io/badge/Prisma-6.19-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io)
+[![PostgreSQL](https://img.shields.io/badge/Neon-PostgreSQL-00e599?style=for-the-badge&logo=postgresql&logoColor=white)](https://neon.tech)
 
-![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/Neon_PostgreSQL-00E5BF?style=for-the-badge&logo=postgresql&logoColor=black)
-![NextAuth](https://img.shields.io/badge/NextAuth-000000?style=for-the-badge&logo=auth0&logoColor=white)
-![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
-
----
-
-## Table of Contents
-
-- [What is AtomQuest?](#what-is-atomquest)
-- [The Enterprise Problem](#the-enterprise-problem)
-- [Core Philosophy](#core-philosophy)
-- [Key Features](#key-features)
-- [Enterprise Governance Architecture](#enterprise-governance-architecture)
-- [Role-Based System](#role-based-system)
-- [Quarterly Governance Lifecycle](#quarterly-governance-lifecycle)
-- [Governance Mathematics](#governance-mathematics)
-- [Shared Goals Engine](#shared-goals-engine)
-- [Demo Navigation Widget](#demo-navigation-widget)
-- [Analytics & Intelligence Layer](#analytics--intelligence-layer)
-- [Executive Reporting System](#executive-reporting-system)
-- [Audit & Compliance Layer](#audit--compliance-layer)
-- [Bonus Enterprise Implementations](#bonus-enterprise-implementations)
-- [System Architecture](#system-architecture)
-- [Database Design](#database-design)
-- [Production Infrastructure](#production-infrastructure)
-- [Demo Credentials](#demo-credentials)
-- [Recommended Demo Flow](#recommended-demo-flow)
-- [Local Development Setup](#local-development-setup)
-- [Production Deployment](#production-deployment)
-- [Technology Stack](#technology-stack)
+</div>
 
 ---
 
-## What is AtomQuest?
+## 🏛️ What Is AtomQuest?
 
-AtomQuest is an enterprise-grade governance and performance intelligence platform built to simulate how modern organizations manage:
+AtomQuest is a **production-deployed enterprise governance platform** that simulates how modern organizations manage KPI performance, quarterly review cycles, organizational accountability, and governance compliance — all through a structured, role-governed system.
 
-- Organizational goals
-- KPI ownership
-- Quarterly evaluations
-- Compliance tracking
-- Shared accountability
-- Cross-team execution
-- Governance escalation
-- Enterprise reporting
-- Audit visibility
-- Role-based operational control
+It is not a CRUD demonstration. AtomQuest models the actual operational mechanics of **enterprise performance management**: goal submission lifecycles, manager approval workflows, quarterly check-in tracking, shared KPI ownership, escalation SLA enforcement, audit tracing, and organization-wide compliance scoring.
 
-Unlike traditional task managers or HR dashboards, AtomQuest focuses on operational governance at enterprise scale. The platform models how managers, employees, and leadership interact across quarterly performance cycles while maintaining transparency, accountability, auditability, and measurable KPI progression.
+> **The core thesis:** Performance accountability without governance infrastructure degrades into noise. AtomQuest operationalizes the governance layer — making KPI ownership, review cadence, and accountability visible, auditable, and enforceable.
 
 ---
 
-## The Enterprise Problem
+## 🎯 The Enterprise Problem
 
-Large organizations suffer from fragmented KPI ownership, no centralized governance visibility, weak quarterly accountability, lack of escalation systems, poor compliance tracking, inconsistent review structures, missing operational analytics, unclear shared ownership models, and invisible performance bottlenecks.
+Most organizations struggle with a predictable set of performance governance failures:
 
-Most tools manage tasks, tickets, or employee records. Very few simulate enterprise governance workflows, KPI intelligence, cross-functional accountability, and operational compliance.
-
-AtomQuest solves this through a fully integrated governance simulation architecture.
-
----
-
-## Core Philosophy
-
-AtomQuest was engineered around five enterprise principles:
-
-| Principle | Description |
+| Failure Mode | Business Impact |
 |---|---|
-| Governance First | Every action is traceable and measurable |
-| Accountability | Ownership is explicit and hierarchical |
-| KPI Intelligence | Goals are mathematically evaluated |
-| Transparency | Managers and employees share visibility |
-| Operational Simulation | Mimics real enterprise governance systems |
+| Goal sheets submitted late or not at all | Cycle integrity collapses; no baseline for review |
+| Managers fail to approve within SLA | Downstream quarterly tracking blocked |
+| No visibility into cross-team shared KPIs | Accountability gaps in collaborative goals |
+| Quarterly check-ins missed silently | Annual reviews are reconstructed, not measured |
+| Weightage errors in goal distribution | Scoring becomes mathematically invalid |
+| No escalation chain for governance violations | HR and leadership are reactive, never proactive |
+| Audit trails missing or incomplete | Compliance and regulatory exposure |
+
+AtomQuest addresses each of these with a purpose-built system: structured data models, enforced workflows, rule-based escalation detection, and complete audit traceability.
 
 ---
 
-## Key Features
+## 🏗️ Architecture Philosophy
 
-### Role-Based Enterprise Architecture
+AtomQuest is built on three architectural principles:
 
-Three roles — `ADMIN`, `MANAGER`, and `EMPLOYEE` — each with isolated dashboards, permissions, analytics visibility, workflow control, and governance authority.
+**1. Governance as a First-Class Concern**
+Every data state transition — draft → submitted → approved → locked — is intentional, enforced, and recorded. The system never silently ignores a lifecycle violation.
 
-### Goal Management System
+**2. Role Isolation Without Complexity**
+Three distinct roles (Employee, Manager, Admin) each operate within a bounded governance surface. Dashboards, API routes, and data access patterns are scoped per role at the server level.
 
-Managers can create KPI goals, assign them to employees, define thrust areas, specify units of measure, monitor quarterly progression, and track completion health. Goal structure includes KPI title, measurable targets, governance quarter, operational category, ownership mapping, completion state, and escalation awareness.
-
-### Quarterly Update Engine
-
-Employees submit Q1 through Q4 updates. Each quarterly update includes actual achievement, progress percentage, operational notes, status classification, and governance scoring.
-
-### Real-Time Analytics
-
-Dynamic analytics dashboards provide completion rates, delayed KPIs, quarterly trends, operational health, governance distribution, manager insights, and employee performance tracking.
-
-### Enterprise Reporting Layer
-
-Includes quarterly summaries, operational snapshots, KPI completion reports, governance compliance reports, delayed objective analysis, and department-wise tracking.
-
-### Shared Goals System
-
-Managers can assign one KPI to multiple employees, designate primary KPI owners, and create collaborative operational goals — simulating real enterprise cross-functional ownership.
-
-### Audit Logging System
-
-Every governance action is tracked: updates, approvals, submissions, assignments, and workflow modifications. This creates enterprise audit visibility, operational accountability, and traceable governance history.
-
-### Enterprise Authentication
-
-Powered by NextAuth with credential-based enterprise login, RBAC middleware, protected routes, and secure session architecture.
+**3. Simulation Fidelity**
+The platform is seeded with realistic organizational data — two managers, six employees across departments, full quarterly update histories — so evaluators experience a genuine governance system, not an empty shell.
 
 ---
 
-## Enterprise Governance Architecture
+## 🧱 System Architecture
 
 ```
-ADMIN
-   |
-   +-- MANAGERS
-   |      |
-   |      +-- EMPLOYEES
-   |      |      +-- Goals
-   |      |      +-- Quarterly Updates
-   |      |      +-- KPI Progression
-   |      |
-   |      +-- Shared Goals
-   |
-   +-- Enterprise Analytics
-```
-
----
-
-## Role-Based System
-
-### ADMIN
-
-The admin oversees organization-wide governance, analytics visibility, audit monitoring, compliance tracking, and operational summaries. Admins can access all dashboards, monitor all users, observe KPI progression, and view enterprise-wide intelligence.
-
-### MANAGER
-
-Managers create goals, assign employees, monitor KPI progression, review quarterly updates, create shared goals, and evaluate organizational performance. Managers have governance ownership, approval authority, analytics access, and cross-team KPI tracking.
-
-### EMPLOYEE
-
-Employees view assigned goals, submit quarterly updates, track progress, and manage personal KPI execution. Capabilities include quarterly submissions, operational status updates, and performance visibility.
-
----
-
-## Quarterly Governance Lifecycle
-
-```
-Goal Creation
-      |
-      v
-Q1 Submission
-      |
-      v
-Q2 Submission
-      |
-      v
-Q3 Submission
-      |
-      v
-Q4 Submission
-      |
-      v
-Manager Review
-      |
-      v
-Governance Evaluation
-      |
-      v
-Analytics Aggregation
-      |
-      v
-Executive Reporting
+┌─────────────────────────────────────────────────────────────────┐
+│                         AtomQuest Platform                       │
+│                                                                   │
+│  ┌──────────────┐   ┌──────────────┐   ┌──────────────────────┐ │
+│  │  Employee    │   │   Manager    │   │       Admin           │ │
+│  │  Dashboard   │   │  Dashboard   │   │     Dashboard         │ │
+│  │              │   │              │   │                       │ │
+│  │ • Goal Sheet │   │ • Approval   │   │ • Org Overview        │ │
+│  │ • Q Updates  │   │   Queue      │   │ • Escalation Engine   │ │
+│  │ • Progress   │   │ • Team KPIs  │   │ • Audit Logs          │ │
+│  │ • Shared     │   │ • Escalations│   │ • User Directory      │ │
+│  │   Goals      │   │ • Check-ins  │   │ • Compliance Score    │ │
+│  └──────┬───────┘   └──────┬───────┘   └──────────┬────────── ┘ │
+│         │                  │                        │             │
+│  ┌──────▼──────────────────▼────────────────────── ▼───────────┐ │
+│  │                  Next.js App Router (v16)                    │ │
+│  │              Server Components · API Routes                  │ │
+│  │              NextAuth Session · RBAC Middleware              │ │
+│  └────────────────────────┬────────────────────────────────────┘ │
+│                           │                                       │
+│  ┌────────────────────────▼────────────────────────────────────┐ │
+│  │                    Prisma ORM Layer                          │ │
+│  │         Type-safe queries · Migration management            │ │
+│  └────────────────────────┬────────────────────────────────────┘ │
+│                           │                                       │
+│  ┌────────────────────────▼────────────────────────────────────┐ │
+│  │               Neon PostgreSQL (Serverless)                   │ │
+│  │    Users · GoalSheets · Goals · QuarterlyUpdates           │ │
+│  │    SharedGoals · CheckinComments · AuditLogs               │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Governance Mathematics
+## 🗃️ Database Schema Design
+
+The data model reflects genuine performance governance structure:
+
+```
+User (EMPLOYEE | MANAGER | ADMIN)
+ └── GoalSheet  [DRAFT | SUBMITTED | APPROVED | RETURNED | LOCKED]
+      └── Goal  [thrustArea, title, weightage, uom, target, isShared]
+           └── QuarterlyUpdate  [Q1 | Q2 | Q3 | Q4]
+                                [NOT_STARTED | ON_TRACK | COMPLETED | DELAYED | AT_RISK]
+
+SharedGoal  ←→  Goal  (many-to-many via sharedFromId)
+             └── primaryOwner (User)
+
+CheckinComment  (Manager → GoalSheet, per Quarter)
+AuditLog        (changedBy → entityType + entityId + oldValue + newValue)
+```
+
+**Key design decisions:**
+
+- `@@unique([goalId, quarter])` on `QuarterlyUpdate` prevents duplicate check-ins
+- `GoalSheet` timestamps (`submittedAt`, `approvedAt`, `lockedAt`) power escalation SLA computation
+- `SharedGoal` separates the shared KPI definition from individual goal sheet entries, enabling true collaborative tracking with a designated primary owner
+- `AuditLog` stores old/new values as strings for schema-agnostic traceability across any entity type
+
+---
+
+## 📦 Repository Structure
+
+```
+atomquest/
+├── prisma/
+│   ├── schema.prisma          # Full data model
+│   ├── seed.ts                # Enterprise-grade seed with org hierarchy
+│   └── migrations/            # Full migration history
+│
+├── src/
+│   ├── middleware.ts           # Route protection via session cookie check
+│   ├── app/
+│   │   ├── (auth)/            # Login page, auth layout
+│   │   ├── (dashboard)/
+│   │   │   ├── employee/      # Employee goal sheet & quarterly views
+│   │   │   ├── manager/       # Approval queue, team KPI views
+│   │   │   ├── admin/         # Org-wide governance, audit, escalations
+│   │   │   ├── analytics/     # Cross-role analytics dashboard
+│   │   │   ├── reports/       # Quarter-wise KPI reporting
+│   │   │   └── shared-goals/  # Collaborative KPI management
+│   │   └── api/
+│   │       ├── auth/          # NextAuth credentials handler
+│   │       ├── goal-sheets/   # CRUD + status transitions
+│   │       ├── goals/         # Goal management endpoints
+│   │       ├── quarterly-updates/ # Q1–Q4 check-in endpoints
+│   │       ├── shared-goals/  # Shared KPI creation & assignment
+│   │       ├── escalations/   # Rule-based escalation engine
+│   │       ├── audit-logs/    # Audit trail retrieval
+│   │       ├── analytics/     # Aggregated KPI analytics
+│   │       ├── reports/       # Reporting endpoints
+│   │       ├── checkins/      # Manager check-in comments
+│   │       ├── dashboard/     # Dashboard summary endpoints
+│   │       └── users/         # User directory
+│   │
+│   ├── components/
+│   │   ├── DemoSwitcher.tsx   # Floating quarter navigation widget
+│   │   ├── SessionWrapper.tsx # Client-side session provider
+│   │   ├── admin/             # Admin-specific UI components
+│   │   ├── goals/             # Goal form, goal card components
+│   │   ├── manager/           # Approval queue, team view components
+│   │   ├── reports/           # Report rendering components
+│   │   ├── layout/            # Sidebar, nav, shell components
+│   │   └── ui/                # Radix UI primitive wrappers
+│   │
+│   ├── lib/
+│   │   ├── auth.ts            # NextAuth configuration
+│   │   └── prisma.ts          # Prisma singleton client
+│   └── types/                 # Shared TypeScript type definitions
+```
+
+---
+
+## 🔐 Authentication & RBAC
+
+### Authentication
+NextAuth credentials provider with `bcryptjs` password hashing. Sessions are JWT-based and validated server-side on every protected API route and server component.
+
+### Route Protection
+`src/middleware.ts` intercepts requests to `/employee/*`, `/manager/*`, `/admin/*`, `/reports/*`, and `/shared-goals/*`. Any request without a valid `next-auth.session-token` or `__Secure-next-auth.session-token` cookie is redirected to `/login`.
+
+### Role-Based Access Control
+
+```
+EMPLOYEE  →  Own goal sheet only. Cannot view other employees' data.
+             Can submit, view quarterly updates, view shared goals assigned to them.
+
+MANAGER   →  Scoped to direct reports (managerId relationship).
+             Approves / returns goal sheets. Views team KPIs.
+             Sees team-scoped escalations. Posts check-in comments.
+
+ADMIN     →  Organization-wide visibility.
+             Full escalation dashboard. Audit log access.
+             User directory management. Global analytics.
+```
+
+Role enforcement is applied at the API layer, not just UI. Every API route validates `session.user.role` before returning data, and manager-scoped routes automatically filter by `managerId` from the session — not from query parameters.
+
+---
+
+## 📋 Goal Sheet Lifecycle
+
+Every employee operates within a structured goal sheet workflow:
+
+```
+DRAFT ──► SUBMITTED ──► APPROVED ──► LOCKED
+                │
+                └──► RETURNED (revision required)
+                          │
+                          └──► SUBMITTED (resubmission)
+```
+
+**State semantics:**
+
+| State | Description |
+|---|---|
+| `DRAFT` | Employee building their goal sheet. Not yet visible to manager. |
+| `SUBMITTED` | Submitted for manager review. Employee cannot edit. |
+| `RETURNED` | Manager returned for revision with a comment. Employee can edit. |
+| `APPROVED` | Manager approved. Quarterly updates can now be tracked. |
+| `LOCKED` | Admin-locked post-cycle. Immutable. Quarterly tracking continues. |
+
+Each transition is timestamped (`submittedAt`, `approvedAt`, `lockedAt`) and logged to the audit system.
+
+---
+
+## 🎯 Goal Mathematics
+
+### Unit of Measure (UoM) Types
+
+| UoM | Interpretation |
+|---|---|
+| `NUMERIC_MAX` | Higher is better (e.g., revenue, throughput) |
+| `NUMERIC_MIN` | Lower is better (e.g., defect count, latency) |
+| `TIMELINE` | Deadline-based achievement |
+| `ZERO` | Binary — achieved or not |
 
 ### KPI Completion Formula
 
 ```
-Completion % = (Actual Achievement / Target) x 100
+Completion % = (Actual Achievement / Target) × 100
 ```
 
-### Status Classification Logic
-
-| Percentage | Status |
-|---|---|
-| >= 90% | COMPLETED |
-| 70% – 89% | ON_TRACK |
-| 50% – 69% | DELAYED |
-| < 50% | AT_RISK |
-
-### Quarterly Aggregation Model
+### Quarterly Status Classification
 
 ```
-Annual KPI Score = (Q1 + Q2 + Q3 + Q4) / 4
+≥ 90%        →  COMPLETED
+70% – 89%    →  ON_TRACK
+50% – 69%    →  DELAYED
+< 50%        →  AT_RISK
 ```
 
-### Weighted Governance Health
-
-The analytics layer aggregates completed goals, delayed goals, at-risk goals, and governance compliance to generate operational intelligence dashboards.
-
----
-
-## Shared Goals Engine
-
-Managers can assign one KPI to multiple employees, create collaborative execution models, define primary KPI owners, and track distributed accountability.
-
-**Example:**
+### Annual KPI Score Aggregation
 
 ```
-Goal: Reduce Customer Complaints
-Target: 95
-
-Assigned To:
-- Priya Sharma
-- Rahul Verma
-- Ananya Iyer
-
-Primary KPI Owner: Rahul Verma
+Annual Score = (Q1_score + Q2_score + Q3_score + Q4_score) / 4
 ```
 
-This simulates enterprise coordination, department collaboration, and distributed ownership models.
+Each quarter's score is stored as `computedScore` on the `QuarterlyUpdate` record, enabling both per-quarter and full-year aggregation without recomputation.
 
----
+### Weightage Constraint
 
-## Demo Navigation Widget
-
-A floating evaluator-assistance utility located at the bottom-right of the interface, designed to improve exploration of the quarterly governance lifecycle during demos and evaluations.
-
-**Purpose:** Enterprise governance systems involve multiple stages — Q1 planning, Q2 progress tracking, Q3 governance review, and Q4 completion analysis. Manually navigating across lifecycle stages during evaluations becomes slow and repetitive.
-
-**Capabilities:**
-- Navigate between Q1 through Q4 views
-- Explore lifecycle progression faster
-- Reduce repetitive navigation during demos
-- Improve evaluator onboarding experience
-- Provide smoother governance-flow traversal
-
----
-
-## Analytics & Intelligence Layer
-
-The analytics engine provides governance health metrics, KPI distribution, completion ratios, delayed KPI detection, operational bottleneck identification, quarterly trends, and employee performance mapping.
-
----
-
-## Executive Reporting System
-
-Enterprise dashboards summarize organizational performance, department execution, delayed initiatives, operational risk, and quarterly completion. Designed to resemble executive governance tools, enterprise KPI systems, and operational review dashboards.
-
----
-
-## Audit & Compliance Layer
-
-Every governance operation is traceable. Tracked actions include goal creation, update submissions, manager approvals, workflow modifications, and governance escalations. This supports enterprise accountability, compliance visibility, and operational traceability.
-
----
-
-## Bonus Enterprise Implementations
-
-| Feature | Description |
-|---|---|
-| Enterprise RBAC Architecture | Granular role isolation using middleware protection, session-aware routing, and role-scoped dashboards |
-| Governance Simulation Engine | Simulates enterprise operational structures, quarterly review systems, and KPI accountability models |
-| Shared KPI Ownership | Advanced multi-employee KPI propagation; rarely implemented at this level |
-| Executive Analytics Dashboard | High-level operational visibility for governance evaluation |
-| Production Cloud Deployment | Fully deployed using Vercel, Neon PostgreSQL, and Prisma ORM |
-| Persistent Cloud Database | Real production database — not local mock storage, not static JSON, not in-memory state |
-| Enterprise Authentication Layer | Production-grade auth flow using NextAuth, encrypted credentials, and session management |
-| Audit Logging Infrastructure | Operational traceability for enterprise governance simulation |
-| Real-Time Governance Traversal | Demo widget enables frictionless evaluator testing and instant workflow exploration |
-
----
-
-## System Architecture
+All goals within a single goal sheet must satisfy:
 
 ```
-Frontend
-|
-+-- Next.js 16
-+-- TypeScript
-+-- React
-+-- Tailwind UI
-
-Backend
-|
-+-- Next.js API Routes
-+-- Prisma ORM
-+-- NextAuth
-
-Database
-|
-+-- Neon PostgreSQL
-     +-- Users
-     +-- Goals
-     +-- Quarterly Updates
-     +-- Shared Goals
-     +-- Audit Logs
+Σ weightage(goal_i) = 100.0
 ```
 
----
-
-## Database Design
-
-| Entity | Purpose |
-|---|---|
-| users | Enterprise identity system |
-| goals | KPI governance objects |
-| goal_sheets | Quarterly ownership grouping |
-| quarterly_updates | KPI progression engine |
-| shared_goals | Collaborative KPI system |
-| audit_logs | Governance traceability |
-| checkin_comments | Review discussions |
+Any deviation is detected by the escalation engine (Rule ESC-RULE-004) and surfaced as a data integrity violation that blocks submission.
 
 ---
 
-## Production Infrastructure
+## 🔗 Shared Goals & Collaborative KPIs
 
-| Layer | Technology |
-|---|---|
-| Frontend Hosting | Vercel |
-| Database | Neon PostgreSQL |
-| ORM | Prisma |
-| Authentication | NextAuth |
-| Runtime | Next.js 16 |
-| Language | TypeScript |
+AtomQuest supports the enterprise pattern of **shared KPI ownership** — where a single organizational target spans multiple employees or teams.
 
----
+### Data Architecture
 
-## Demo Credentials
+```
+SharedGoal (created by manager/admin)
+ ├── title, thrustArea, target, uom
+ ├── primaryOwnerId  →  User (primary accountable owner)
+ └── goals[]         →  Goal entries across multiple GoalSheets
+```
 
-**Admin**
+Each participating employee has a `Goal` record in their own `GoalSheet` that references the parent `SharedGoal` via `sharedFromId`. The `isPrimaryOwner` flag identifies which participant carries primary accountability.
 
-| Field | Value |
-|---|---|
-| Email | admin@demo.com |
-| Password | password123 |
-
-**Manager 1**
-
-| Field | Value |
-|---|---|
-| Email | manager@demo.com |
-| Password | password123 |
-
-**Manager 2**
-
-| Field | Value |
-|---|---|
-| Email | manager2@demo.com |
-| Password | password123 |
-
-**Employees** (all use password `password123`)
-
-- priya@demo.com
-- rahul@demo.com
-- ananya@demo.com
-- arjun@demo.com
-- sneha@demo.com
-- vikram@demo.com
+### Governance Implications
+- All participants track quarterly updates independently
+- The primary owner's score is considered authoritative for organizational rollups
+- Managers can view shared KPI progress across their direct reports in aggregate
 
 ---
 
-## Recommended Demo Flow
+## ⚡ Escalation Engine
 
-**Step 1 — Login as Manager**
+The escalation engine (`/api/escalations`) is a **rule-based governance processor** that evaluates live database state against configurable SLA thresholds and emits structured escalation records with severity classification, timeline stages, risk scores, and compliance metadata.
 
-Explore the team dashboard, goal creation interface, shared goals, and analytics.
+### Escalation Rules
 
-**Step 2 — Create a Shared KPI**
+#### ESC-RULE-001 — Goal Submission Delay
+```
+Trigger:   GoalSheet.status = DRAFT  AND  daysSince(createdAt) ≥ 14
+Severity:  MEDIUM (14–30 days)  |  HIGH (> 30 days)
+Chain:     Employee → Manager → HR → Governance
+RiskScore: min(100, 40 + daysPending)
+```
 
-Create a goal titled "Reduce Customer Complaints" with a target of 95, assigned to Priya, Rahul, and Ananya.
+#### ESC-RULE-002 — Approval Pending (SLA Breach)
+```
+Trigger:   GoalSheet.status = SUBMITTED  AND  daysSince(submittedAt) ≥ 7
+Severity:  HIGH (7–14 days)  |  CRITICAL (> 14 days)
+Chain:     Manager → HR Leadership → Governance Board
+RiskScore: min(100, 60 + daysPending)
+```
 
-**Step 3 — Login as Employee**
+#### ESC-RULE-003 — Quarterly Check-in Missed
+```
+Trigger:   GoalSheet.status = LOCKED  AND
+           expected quarters based on daysSince(lockedAt) / 90
+           AND no QuarterlyUpdate exists for that quarter
+Severity:  CRITICAL
+Chain:     Employee → Manager → HR Escalated → Governance Board
+RiskScore: 90
+```
 
-Explore employee dashboards and submit quarterly updates.
-Use the Demo Navigation Widget to quickly traverse quarterly lifecycle views (Q1 → Q4) during evaluation.
+#### ESC-RULE-004 — Weightage Mismatch
+```
+Trigger:   Σ goal.weightage ≠ 100.0  (tolerance: 0.01)
+Severity:  LOW
+Chain:     Employee (submission blocked by system)
+RiskScore: 20
+```
 
-**Step 4 — Observe Analytics**
+### Compliance Score Formula
 
-Return to the manager or admin view to review KPI updates, inspect governance trends, and analyze completion states.
+```
+submissionScore  = (submittedSheets / totalEmployees) × 100
+approvalScore    = (approvedSheets / submittedSheets) × 100
+escalationPenalty = min(30, totalActiveEscalations × 3)
 
-**Step 5 — Explore Reports**
+complianceScore = max(0,
+  submissionScore × 0.4 + approvalScore × 0.6 − escalationPenalty
+)
+```
 
-Inspect operational summaries, delayed KPIs, quarterly analytics, and governance health.
+This single score gives leadership an at-a-glance organizational governance health metric.
+
+### Escalation Response Shape
+
+Each escalation record includes:
+- `type`, `severity`, `status` — classification fields
+- `issueSummary`, `detailText` — human-readable governance narrative
+- `daysPending`, `chainStage`, `escalatedTo` — accountability routing
+- `timeline[]` — ordered governance stages with completion states
+- `complianceMeta` — `ruleId`, `threshold`, `riskScore`, `category`
+- `employee` + `manager` — full identity context
 
 ---
 
-## Local Development Setup
+## 📊 Analytics Architecture
 
-**Clone the repository**
+The analytics layer aggregates cross-entity governance data into dashboard metrics:
+
+- **Completion rate distribution** — percentage of goals in each status (COMPLETED / ON_TRACK / DELAYED / AT_RISK) across the organization or team scope
+- **Quarterly trend analysis** — Q1 through Q4 score progression per employee or aggregate
+- **KPI weightage distribution** — visual breakdown of how goal weight is distributed across thrust areas
+- **Governance pipeline** — goal sheet funnel: DRAFT → SUBMITTED → APPROVED → LOCKED counts
+
+Analytics endpoints respect role scoping: managers see only their direct reports; admins see organization-wide data.
+
+---
+
+## 📑 Audit System
+
+Every significant state change is persisted to the `AuditLog` table:
+
+```typescript
+model AuditLog {
+  entityType        String   // "GoalSheet" | "Goal" | "QuarterlyUpdate" | ...
+  entityId          String   // CUID of the affected record
+  changedById       String   // User who performed the action
+  changeDescription String   // Human-readable event label
+  oldValue          String?  // Previous state (JSON serialized)
+  newValue          String?  // New state (JSON serialized)
+  changedAt         DateTime
+}
+```
+
+**Audit coverage includes:**
+- Goal sheet status transitions (DRAFT → SUBMITTED, APPROVED, RETURNED, LOCKED)
+- Goal creation and modification
+- Quarterly update submissions
+- Shared goal assignments
+
+Admin dashboard surfaces audit logs with filtering by entity type, user, and time range — providing full governance traceability without external tooling.
+
+---
+
+## 🎛️ Demo Navigation Widget
+
+The floating `DemoSwitcher` widget is an **evaluator assistance utility** — not a role switcher, not an authentication bypass.
+
+**What it does:**
+- Renders as a draggable, pointer-capture–enabled floating panel (bottom-right, z-index 50)
+- Allows selection of `Real Time | Simulate Q1 | Q2 | Q3 | Q4`
+- Writes a `demo_quarter` cookie that instructs server components and API routes to present data as if the selected quarter is active
+- Triggers a full page reload to apply the state consistently across server and client components
+
+**What it does not do:**
+- It does not switch the authenticated user's role
+- It does not bypass RBAC or session validation
+- It does not modify any database records
+- Role-specific data access restrictions remain fully enforced regardless of widget state
+
+This design means an evaluator logged in as `manager@demo.com` can traverse Q1 through Q4 lifecycle states while remaining under the Manager RBAC scope throughout.
+
+---
+
+## 🚀 Production Deployment
+
+| Layer | Technology | Notes |
+|---|---|---|
+| Frontend + API | Next.js 16 on Vercel | Serverless edge deployment |
+| Database | Neon PostgreSQL | Serverless, connection-pooled |
+| ORM | Prisma 6.19 | Type-safe schema + migrations |
+| Auth | NextAuth v4 | Credentials provider, JWT sessions |
+| Styling | TailwindCSS v4 | PostCSS pipeline |
+| Forms | React Hook Form + Zod | Runtime schema validation |
+| Charts | Recharts | Quarterly analytics visualization |
+| UI Primitives | Radix UI | Dialog, Select, Tabs, Toast, Dropdown |
+
+---
+
+## 🔑 Demo Access Credentials
+
+All accounts share the password: **`password123`**
+
+### Admin
+| Email | Role | Access Scope |
+|---|---|---|
+| `admin@demo.com` | ADMIN | Organization-wide governance, audit logs, escalation engine, user directory |
+
+### Managers
+| Email | Name | Team |
+|---|---|---|
+| `manager@demo.com` | Alice Johnson | Priya, Rahul, Ananya |
+| `manager2@demo.com` | Bob Smith | Arjun, Sneha, Vikram |
+
+### Employees
+| Email | Name | Department |
+|---|---|---|
+| `priya@demo.com` | Priya Sharma | Product Engineering |
+| `rahul@demo.com` | Rahul Verma | Operations |
+| `ananya@demo.com` | Ananya Iyer | QA Automation |
+| `arjun@demo.com` | Arjun Nair | Sales |
+| `sneha@demo.com` | Sneha Reddy | HR |
+| `vikram@demo.com` | Vikram Singh | Marketing |
+
+> **Seeded state:** Priya, Ananya, Arjun, and Sneha have fully locked goal sheets with complete Q1–Q4 quarterly update histories. Rahul and Vikram have draft sheets, which will surface in the escalation engine.
+
+---
+
+## 🧭 Recommended Evaluator Walkthrough
+
+### Pass 1 — Admin Governance Overview (5 min)
+
+1. Log in as `admin@demo.com`
+2. Review the admin dashboard — goal sheet pipeline counts, compliance score
+3. Navigate to **Escalations** — observe rule-based escalation records with severity, timeline stages, and SLA breach details
+4. Navigate to **Audit Logs** — review governance traceability records
+5. Navigate to **User Directory** — view org hierarchy
+
+### Pass 2 — Manager Approval Workflow (5 min)
+
+1. Log in as `manager@demo.com`
+2. Review the approval queue — Rahul's draft sheet will show as pending submission
+3. Navigate to **Team KPIs** — view aggregate quarterly performance for direct reports
+4. Navigate to **Escalations** — observe manager-scoped escalation view (only own team)
+
+### Pass 3 — Employee Goal Lifecycle (5 min)
+
+1. Log in as `priya@demo.com`
+2. View goal sheet with locked status and complete Q1–Q4 update history
+3. Navigate to **Shared Goals** — observe any assigned collaborative KPIs
+4. Switch to `rahul@demo.com` — observe draft state, incomplete submission
+
+### Pass 4 — Quarterly Lifecycle Simulation (5 min)
+
+1. Log in as any role
+2. Use the **Demo Mode** floating widget (bottom-right) to switch between Q1, Q2, Q3, Q4
+3. Observe how dashboards, progress indicators, and KPI states respond to the active quarter context
+4. Return widget to **Real Time** to restore live state
+
+---
+
+## 🛠️ Local Development
+
+### Prerequisites
+- Node.js 20+
+- PostgreSQL connection string (or Neon project)
+
+### Setup
 
 ```bash
-git clone https://github.com/nsgxi43/AtomQuest.git
-cd AtomQuest
-```
+git clone <repository-url>
+cd atomquest
 
-**Install dependencies**
-
-```bash
+# Install dependencies
 npm install
-```
 
-**Configure environment variables**
+# Configure environment
+cp .env.example .env.local
+# Set DATABASE_URL and NEXTAUTH_SECRET in .env.local
 
-Create a `.env.local` file:
+# Apply migrations
+npx prisma migrate deploy
 
-```env
-DATABASE_URL=
-NEXTAUTH_SECRET=
-NEXTAUTH_URL=http://localhost:3000
-```
-
-**Generate Prisma client**
-
-```bash
-npx prisma generate
-```
-
-**Push database schema**
-
-```bash
-npx prisma db push
-```
-
-**Seed demo data**
-
-```bash
+# Seed enterprise demo data
 npx prisma db seed
-```
 
-**Start development server**
-
-```bash
+# Start development server
 npm run dev
 ```
 
----
-
-## Production Deployment
-
-The platform is production-deployed using GitHub, Vercel, Neon PostgreSQL, and Prisma ORM via an automatic GitHub integration pipeline with cloud database synchronization and serverless deployment architecture.
+Open [http://localhost:3000](http://localhost:3000) and log in with any demo credential.
 
 ---
 
-## Technology Stack
+## 🗺️ Future Roadmap
 
-**Frontend**
+| Capability | Description |
+|---|---|
+| **Notification Engine** | Real-time in-app notifications for goal approvals, returns, and escalation triggers |
+| **Goal Revision History** | Full diff-based version history for goal edits, surfaced in audit UI |
+| **Bulk Operations** | Admin batch approval, bulk goal sheet locking for cycle close |
+| **Export & Reporting** | PDF/CSV export of quarterly performance reports per employee |
+| **Real SSO Integration** | OIDC/SAML integration replacing simulated Entra ID experience |
+| **Performance Calibration** | Bell-curve calibration layer for cross-team normalization |
+| **Mobile-Responsive Shell** | Fully adapted mobile experience for employee self-service |
+| **Webhook Outbound** | Governance event webhooks for HRMS integration |
 
-![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
-![React](https://img.shields.io/badge/React_19-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+---
 
-**Backend**
+## 🏆 Why AtomQuest Stands Apart
 
-![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
-![NextAuth](https://img.shields.io/badge/NextAuth-000000?style=for-the-badge&logo=auth0&logoColor=white)
-![API Routes](https://img.shields.io/badge/API_Routes-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
+Most portfolio projects demonstrate the ability to build forms and query a database. AtomQuest demonstrates something harder: the ability to **model organizational systems**.
 
-**Database**
+- **Real governance mechanics** — not simulated with fake dropdowns, but enforced through state machines, SLA computation, and rule engines operating on live data
+- **Role isolation at the data layer** — RBAC is not a UI concern; it is enforced in every API route via server-side session validation and Prisma query scoping
+- **Escalation intelligence** — four distinct compliance rules with configurable thresholds, multi-stage timeline construction, risk scoring, and a composite organizational compliance metric
+- **Audit-first design** — every significant state transition is persisted with old/new value tracking for forensic governance traceability
+- **Production deployment** — live on Vercel with Neon serverless PostgreSQL; not a localhost demo
+- **Enterprise data fidelity** — seeded with a realistic org hierarchy, multi-department employee distribution, and complete quarterly update histories
 
-![PostgreSQL](https://img.shields.io/badge/Neon_PostgreSQL-00E5BF?style=for-the-badge&logo=postgresql&logoColor=black)
+AtomQuest is built for the evaluator who asks: *"Can this engineer design systems, not just write code?"*
 
-**Deployment**
+---
 
-![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
-![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
+<div align="center">
+
+**Built with precision. Deployed with intent.**
+
+[Live Platform →](https://atom-quest-lake.vercel.app)
+
+</div>
