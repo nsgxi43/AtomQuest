@@ -61,7 +61,7 @@ The platform is seeded with realistic organizational data — two managers, six 
 
 ## System Architecture
 
-![Uploading systemarc.png…]()
+![System Architecture](./systemarc.png)
 
 
 ---
