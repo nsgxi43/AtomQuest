@@ -17,6 +17,12 @@ interface SSOUser {
   role: "ADMIN" | "MANAGER" | "EMPLOYEE";
   initials: string; avatarColor: string;
   reportsTo: { name: string; email: string } | null;
+  aadGroup?: string;
+  department?: string;
+  accessScope?: string[];
+  directReports?: number;
+  tenantDomain?: string;
+  upn?: string;
 }
 const ROLE_ROUTE: Record<string, string> = {
   ADMIN: "/admin", MANAGER: "/manager", EMPLOYEE: "/employee",
@@ -167,73 +173,139 @@ function AccountPicker({ onClose, onPick }: {
 }) {
   const [users, setUsers] = useState<SSOUser[]>([]);
   const [busy, setBusy] = useState(true);
+  const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch("/api/sso-directory").then(r => r.json())
       .then(d => { setUsers(Array.isArray(d) ? d : []); setBusy(false); })
       .catch(() => setBusy(false));
+    // Trigger entrance animation on next tick
+    requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)));
   }, []);
+
   useEffect(() => {
     const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", h);
     return () => document.removeEventListener("keydown", h);
   }, [onClose]);
 
-  const roleBadge: Record<string, string> = {
-    ADMIN: "bg-violet-100 text-violet-700",
-    MANAGER: "bg-blue-100 text-blue-700",
-    EMPLOYEE: "bg-emerald-100 text-emerald-700",
+  const roleMeta: Record<string, { badge: string; label: string; scopeColor: string }> = {
+    ADMIN:    { badge: "bg-violet-100 text-violet-700 border border-violet-200", label: "Administrator",     scopeColor: "text-violet-600" },
+    MANAGER:  { badge: "bg-blue-100 text-blue-700 border border-blue-200",       label: "Line Manager",       scopeColor: "text-blue-600"   },
+    EMPLOYEE: { badge: "bg-emerald-100 text-emerald-700 border border-emerald-200", label: "Employee",        scopeColor: "text-emerald-600" },
   };
 
+  const tenantDomain = !busy && users.length > 0
+    ? (users[0].tenantDomain ?? users[0].email.split("@")[1] ?? "corp.atomquest.io")
+    : "corp.atomquest.io";
+
   return (
-    <div ref={ref} onClick={e => { if (e.target === ref.current) onClose(); }}
-      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+    <div
+      ref={ref}
+      onClick={e => { if (e.target === ref.current) onClose(); }}
+      className="fixed inset-0 flex items-center justify-center z-50 p-4 transition-all duration-200"
+      style={{ backgroundColor: visible ? "rgba(0,0,0,0.45)" : "rgba(0,0,0,0)" }}
+    >
+      <div
+        className="bg-white border border-gray-200 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transition-all duration-200"
+        style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0) scale(1)" : "translateY(12px) scale(0.97)" }}
+      >
+        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <div className="flex items-center gap-2.5">
-            <div className="grid grid-cols-2 gap-0.5 w-5 h-5 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="grid grid-cols-2 gap-[2px] w-5 h-5 flex-shrink-0">
               <div className="bg-[#f25022] rounded-[1px]" /><div className="bg-[#7fba00] rounded-[1px]" />
               <div className="bg-[#00a4ef] rounded-[1px]" /><div className="bg-[#ffb900] rounded-[1px]" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-900">Microsoft Entra ID</p>
-              <p className="text-xs text-gray-500">Choose an account to continue</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold text-gray-900">Microsoft Entra ID</p>
+                <span className="text-[9px] font-semibold bg-amber-50 text-amber-600 border border-amber-200 px-1.5 py-0.5 rounded uppercase tracking-wide">Simulated</span>
+              </div>
+              <p className="text-xs text-gray-500">Select an identity to continue · SSO architecture demo</p>
             </div>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-100 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="overflow-y-auto" style={{ maxHeight: "380px" }}>
+
+        {/* Tenant info bar */}
+        <div className="px-5 py-2 bg-blue-50/60 border-b border-blue-100/80 flex items-center gap-2">
+          <Shield className="w-3 h-3 text-blue-400 flex-shrink-0" />
+          <span className="text-[10px] text-blue-600 font-mono font-medium tracking-wide">{tenantDomain}</span>
+          <span className="text-[10px] text-blue-400 ml-auto">Enterprise SSO Simulation · RBAC-Governed</span>
+        </div>
+
+        {/* User list */}
+        <div className="overflow-y-auto" style={{ maxHeight: "360px" }}>
           {busy
             ? <div className="flex items-center justify-center py-10 gap-2 text-gray-500">
-                <Loader2 className="w-4 h-4 animate-spin" /><span className="text-sm">Loading directory…</span>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">Resolving identity directory…</span>
               </div>
-            : users.map(u => (
-              <button key={u.id} onClick={() => onPick(u)}
-                className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors text-left group border-b border-gray-100 last:border-0">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold text-white"
-                  style={{ backgroundColor: u.avatarColor }}>{u.initials}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-900">{u.name}</span>
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${roleBadge[u.role] ?? "bg-gray-100 text-gray-700"}`}>
-                      {u.role.charAt(0) + u.role.slice(1).toLowerCase()}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 truncate">{u.email}</p>
-                  {u.reportsTo && <p className="text-[10px] text-gray-400 mt-0.5">Reports to {u.reportsTo.name}</p>}
-                </div>
-                <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-600 flex-shrink-0 transition-colors" />
-              </button>
-            ))
+            : users.map((u, i) => {
+                const meta = roleMeta[u.role] ?? roleMeta.EMPLOYEE;
+                const scopePreview = u.accessScope?.slice(0, 2).join(" · ") ?? "";
+                return (
+                  <button
+                    key={u.id}
+                    onClick={() => onPick(u)}
+                    className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left group border-b border-gray-100 last:border-0"
+                    style={{ animationDelay: `${i * 30}ms` }}
+                  >
+                    {/* Avatar */}
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold text-white shadow-sm"
+                      style={{ backgroundColor: u.avatarColor }}
+                    >
+                      {u.initials}
+                    </div>
+
+                    {/* Identity block */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-sm font-semibold text-gray-900">{u.name}</span>
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${meta.badge}`}>
+                          {meta.label}
+                        </span>
+                        {u.directReports !== undefined && u.directReports > 0 && (
+                          <span className="text-[9px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">
+                            {u.directReports} direct report{u.directReports !== 1 ? "s" : ""}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 truncate mt-0.5">{u.upn ?? u.email}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {u.department && (
+                          <span className="text-[9px] text-gray-400 truncate">{u.department}</span>
+                        )}
+                        {u.reportsTo && (
+                          <span className="text-[9px] text-gray-400">· Reports to {u.reportsTo.name}</span>
+                        )}
+                      </div>
+                      {scopePreview && (
+                        <p className={`text-[9px] font-mono mt-0.5 truncate ${meta.scopeColor}`}>{scopePreview}</p>
+                      )}
+                    </div>
+
+                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 flex-shrink-0 transition-colors" />
+                  </button>
+                );
+              })
           }
         </div>
-        <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 text-center">
-          <p className="text-[10px] text-gray-400 font-mono">
-            {users[0]?.email.split("@")[1] ?? "corp.atomquest.io"} · Microsoft Entra ID
-          </p>
+
+        {/* Footer */}
+        <div className="px-5 py-3 bg-gray-50 border-t border-gray-100">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-gray-400 font-mono">{tenantDomain} · Entra ID</span>
+            <div className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="text-[10px] text-gray-400">Architecture-ready SSO</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -284,14 +356,22 @@ export default function LoginPage() {
   if (ssoLoading && ssoUser) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <div className="text-center">
-          <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-base font-bold text-white"
-            style={{ backgroundColor: ssoUser.avatarColor }}>{ssoUser.initials}</div>
-          <p className="text-gray-200 font-semibold">{ssoUser.name}</p>
-          <p className="text-gray-500 text-sm mt-0.5">{ssoUser.email}</p>
-          <div className="flex items-center justify-center gap-2 mt-5 text-gray-500 text-sm">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Signing in…
+        <div className="text-center max-w-xs">
+          {/* MS logo mark */}
+          <div className="grid grid-cols-2 gap-[3px] w-8 h-8 mx-auto mb-5">
+            <div className="bg-[#f25022] rounded-[2px]" /><div className="bg-[#7fba00] rounded-[2px]" />
+            <div className="bg-[#00a4ef] rounded-[2px]" /><div className="bg-[#ffb900] rounded-[2px]" />
           </div>
+          <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 text-lg font-bold text-white ring-2 ring-white/10"
+            style={{ backgroundColor: ssoUser.avatarColor }}>{ssoUser.initials}</div>
+          <p className="text-gray-100 font-semibold text-base">{ssoUser.name}</p>
+          <p className="text-gray-500 text-sm mt-0.5 font-mono">{ssoUser.upn ?? ssoUser.email}</p>
+          {ssoUser.department && <p className="text-gray-600 text-xs mt-1">{ssoUser.department}</p>}
+          <div className="flex items-center justify-center gap-2 mt-6 text-gray-500 text-sm">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            <span>Establishing enterprise session…</span>
+          </div>
+          <p className="text-gray-700 text-[10px] mt-3 font-mono">Microsoft Entra ID · Architecture-ready SSO Simulation</p>
         </div>
       </div>
     );
@@ -380,9 +460,10 @@ export default function LoginPage() {
               {/* Trust chips */}
               <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
                 {[
-                  { icon: Shield,       label: "SSO Enabled"    },
-                  { icon: Lock,         label: "RBAC Protected" },
-                  { icon: CheckCircle2, label: "SOC2 Ready"     },
+                  { icon: Shield,       label: "SSO Enabled"           },
+                  { icon: Lock,         label: "RBAC Protected"        },
+                  { icon: CheckCircle2, label: "SOC2 Ready"            },
+                  { icon: Users,        label: "Enterprise Identity"   },
                 ].map(({ icon: Icon, label }) => (
                   <span key={label} className="flex items-center gap-1.5 text-[11px] text-gray-500 bg-white border border-gray-200 px-2.5 py-1 rounded-full shadow-sm">
                     <Icon className="w-3 h-3 text-gray-400" />{label}
@@ -412,6 +493,9 @@ export default function LoginPage() {
 
               <p className="text-center text-gray-400 text-[11px] mt-4">
                 AtomQuest · Enterprise Edition · FY 2025
+              </p>
+              <p className="text-center text-gray-300 text-[10px] mt-1">
+                SSO architecture inspired by Microsoft Entra ID workflows · Simulated
               </p>
             </div>
           </div>
