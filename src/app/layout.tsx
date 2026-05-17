@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/lib/auth";
 import SessionWrapper from "@/components/SessionWrapper";
+import { DemoSwitcher } from "@/components/DemoSwitcher";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <SessionWrapper>{children}</SessionWrapper>
+        <DemoSwitcher />
       </body>
     </html>
   );

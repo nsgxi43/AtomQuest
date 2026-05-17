@@ -9,6 +9,7 @@ import { ScoreBar } from "@/components/ui/ScoreBar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatDate, calculateGoalProgress } from "@/lib/utils";
 import { getCycleStatus, getQuarterState, getQuarterMessage, Quarter } from "@/lib/cycle";
+import { getEffectiveDateClient } from "@/lib/cycle-client";
 
 interface Employee {
   id: string;
@@ -75,6 +76,8 @@ export default function ManagerCheckInPage() {
     };
     fetchEmployees();
   }, []);
+
+  const effectiveDate = getEffectiveDateClient();
 
   // Load goal sheet + quarterly updates when employee selected
   useEffect(() => {
@@ -178,7 +181,7 @@ export default function ManagerCheckInPage() {
           </p>
         </div>
         <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg text-sm font-medium border border-blue-100">
-          {getCycleStatus().message}
+          {getCycleStatus(effectiveDate).message}
         </div>
       </div>
 
@@ -214,9 +217,9 @@ export default function ManagerCheckInPage() {
               </label>
               <div className="flex gap-2">
                 {QUARTERS.map((q) => {
-                  const state = getQuarterState(q as Quarter);
+                  const state = getQuarterState(q as Quarter, effectiveDate);
                   const isFuture = state === "LOCKED_FUTURE";
-                  const message = getQuarterMessage(q as Quarter);
+                  const message = getQuarterMessage(q as Quarter, effectiveDate);
 
                   return (
                     <div key={q} className="relative group">
@@ -342,30 +345,30 @@ export default function ManagerCheckInPage() {
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Provide constructive feedback on goal progress..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg h-32 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
-                disabled={getQuarterState(selectedQuarter as Quarter) !== "ACTIVE"}
+                disabled={getQuarterState(selectedQuarter as Quarter, effectiveDate) !== "ACTIVE"}
               />
               <p className="text-gray-500 text-xs mt-1">
                 {comment.length} characters
                 {comment.length < 10 && ` (need ${10 - comment.length} more)`}
               </p>
             </div>
-            {getQuarterState(selectedQuarter as Quarter) === "LOCKED_PAST" && (
+            {getQuarterState(selectedQuarter as Quarter, effectiveDate) === "LOCKED_PAST" && (
               <div className="bg-gray-50 text-gray-800 p-3 rounded-lg text-sm border border-gray-200 flex items-center gap-2">
                 <Lock className="w-4 h-4 text-gray-500" />
                 {selectedQuarter} is historical and read-only.
               </div>
             )}
-            {getQuarterState(selectedQuarter as Quarter) === "LOCKED_FUTURE" && (
+            {getQuarterState(selectedQuarter as Quarter, effectiveDate) === "LOCKED_FUTURE" && (
               <div className="bg-gray-50 text-gray-800 p-3 rounded-lg text-sm border border-gray-200 flex items-center gap-2">
                 <Lock className="w-4 h-4 text-gray-500" />
-                {getQuarterMessage(selectedQuarter as Quarter)}
+                {getQuarterMessage(selectedQuarter as Quarter, effectiveDate)}
               </div>
             )}
             <Button
               variant="primary"
               onClick={handleSubmit}
               loading={submitting}
-              disabled={comment.length < 10 || getQuarterState(selectedQuarter as Quarter) !== "ACTIVE"}
+              disabled={comment.length < 10 || getQuarterState(selectedQuarter as Quarter, effectiveDate) !== "ACTIVE"}
             >
               Save Check-in Comment
             </Button>

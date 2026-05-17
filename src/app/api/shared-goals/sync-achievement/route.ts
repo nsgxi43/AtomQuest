@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateGoalProgress } from "@/lib/utils";
 import { canEditQuarter } from "@/lib/cycle";
+import { getEffectiveDateFromQuarter } from "@/lib/cycle-client";
 
 /**
  * POST /api/shared-goals/sync-achievement
@@ -19,7 +20,10 @@ export async function POST(request: NextRequest) {
     const { sharedGoalId, quarter, actualAchievement } =
       await request.json();
 
-    if (!canEditQuarter(quarter, (session.user as any).role)) {
+    const demoCookie = request.cookies.get("demo_quarter")?.value;
+    const effectiveDate = getEffectiveDateFromQuarter(demoCookie);
+
+    if (!canEditQuarter(quarter, (session.user as any).role, effectiveDate)) {
       return NextResponse.json(
         { error: `The check-in window for ${quarter} is currently closed.` },
         { status: 403 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canEditQuarter } from "@/lib/cycle";
+import { getEffectiveDateFromQuarter } from "@/lib/cycle-client";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +13,10 @@ export async function POST(request: NextRequest) {
 
     const { goalSheetId, quarter, comment } = await request.json();
 
-    if (!canEditQuarter(quarter, (session.user as any).role)) {
+    const demoCookie = request.cookies.get("demo_quarter")?.value;
+    const effectiveDate = getEffectiveDateFromQuarter(demoCookie);
+
+    if (!canEditQuarter(quarter, (session.user as any).role, effectiveDate)) {
       return NextResponse.json(
         { error: `The check-in window for ${quarter} is currently closed.` },
         { status: 403 }

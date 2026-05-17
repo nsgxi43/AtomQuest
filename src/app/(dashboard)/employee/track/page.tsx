@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Goal, QuarterlyUpdate } from "@/types";
 import { calculateGoalProgress } from "@/lib/utils";
 import { getCycleStatus, getQuarterState, getQuarterMessage, Quarter } from "@/lib/cycle";
+import { getEffectiveDateClient } from "@/lib/cycle-client";
 
 type UpdateState = Record<
   string,
@@ -170,6 +171,8 @@ export default function QuarterlyTrackingPage() {
     }
   };
 
+  const effectiveDate = getEffectiveDateClient();
+
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center h-64">
@@ -186,15 +189,15 @@ export default function QuarterlyTrackingPage() {
           <p className="text-gray-600 mt-1">Track goal progress by quarter</p>
         </div>
         <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg text-sm font-medium border border-blue-100">
-          {getCycleStatus().message}
+          {getCycleStatus(effectiveDate).message}
         </div>
       </div>
 
       <div className="flex gap-2 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
         {quarters.map((q) => {
-          const state = getQuarterState(q as Quarter);
+          const state = getQuarterState(q as Quarter, effectiveDate);
           const isFuture = state === "LOCKED_FUTURE";
-          const message = getQuarterMessage(q as Quarter);
+          const message = getQuarterMessage(q as Quarter, effectiveDate);
 
           return (
             <div key={q} className="relative group">
@@ -279,7 +282,7 @@ export default function QuarterlyTrackingPage() {
                           }
                           className="w-32 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-gray-100 disabled:text-gray-500"
                           placeholder={goal.uom === "TIMELINE" ? "YYYY-MM-DD" : "Enter value"}
-                          disabled={getQuarterState(activeQuarter as Quarter) !== "ACTIVE"}
+                          disabled={getQuarterState(activeQuarter as Quarter, effectiveDate) !== "ACTIVE"}
                         />
                       </Td>
                       <Td>
@@ -306,16 +309,16 @@ export default function QuarterlyTrackingPage() {
         </CardBody>
       </Card>
 
-      {getQuarterState(activeQuarter as Quarter) === "LOCKED_PAST" && goals.length > 0 && (
+      {getQuarterState(activeQuarter as Quarter, effectiveDate) === "LOCKED_PAST" && goals.length > 0 && (
         <div className="bg-gray-50 text-gray-800 p-4 rounded-lg text-sm border border-gray-200 flex items-center gap-2">
           <Lock className="w-4 h-4 text-gray-500" />
           {activeQuarter} is historical and read-only. Editing is disabled.
         </div>
       )}
-      {getQuarterState(activeQuarter as Quarter) === "LOCKED_FUTURE" && goals.length > 0 && (
+      {getQuarterState(activeQuarter as Quarter, effectiveDate) === "LOCKED_FUTURE" && goals.length > 0 && (
         <div className="bg-gray-50 text-gray-800 p-4 rounded-lg text-sm border border-gray-200 flex items-center gap-2">
           <Lock className="w-4 h-4 text-gray-500" />
-          {getQuarterMessage(activeQuarter as Quarter)}
+          {getQuarterMessage(activeQuarter as Quarter, effectiveDate)}
         </div>
       )}
 
@@ -323,7 +326,7 @@ export default function QuarterlyTrackingPage() {
         variant="primary"
         onClick={handleSave}
         loading={saving}
-        disabled={goals.length === 0 || getQuarterState(activeQuarter as Quarter) !== "ACTIVE"}
+        disabled={goals.length === 0 || getQuarterState(activeQuarter as Quarter, effectiveDate) !== "ACTIVE"}
         className="flex items-center gap-2"
       >
         <RefreshCw className="w-4 h-4" />

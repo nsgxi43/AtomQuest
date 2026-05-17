@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/Badge";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { calculateGoalProgress } from "@/lib/utils";
 import { getCycleStatus } from "@/lib/cycle";
+import { getEffectiveDateClient } from "@/lib/cycle-client";
 
 interface ReportRow {
   employeeId: string;
@@ -144,7 +145,7 @@ export default function ReportsPage() {
             Real-time achievement and completion metrics
           </p>
           <div className="mt-3 inline-block bg-blue-50 text-blue-800 px-3 py-1.5 rounded-md text-sm font-medium border border-blue-100">
-            Current Cycle: {getCycleStatus().activeQuarter || "No Active Quarter"} — {getCycleStatus().message}
+            Current Cycle: {getCycleStatus(getEffectiveDateClient()).activeQuarter || "No Active Quarter"} — {getCycleStatus(getEffectiveDateClient()).message}
           </div>
         </div>
         <Button
