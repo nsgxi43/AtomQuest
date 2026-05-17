@@ -8,7 +8,12 @@ AtomQuest is a production-grade enterprise governance platform designed to simul
 
 **Production URL:** https://atom-quest-lake.vercel.app
 
-**Stack:** Next.js 16 · TypeScript · Prisma ORM · Neon PostgreSQL · NextAuth · Vercel
+![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/Neon_PostgreSQL-00E5BF?style=for-the-badge&logo=postgresql&logoColor=black)
+![NextAuth](https://img.shields.io/badge/NextAuth-000000?style=for-the-badge&logo=auth0&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
 ---
 
@@ -457,12 +462,24 @@ The platform is production-deployed using GitHub, Vercel, Neon PostgreSQL, and P
 
 ## Technology Stack
 
-**Frontend:** Next.js 16, React 19, TypeScript, TailwindCSS
+**Frontend**
 
-**Backend:** Prisma ORM, NextAuth, API Routes
+![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React_19-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 
-**Database:** Neon PostgreSQL
+**Backend**
 
-**Deployment:** Vercel
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
+![NextAuth](https://img.shields.io/badge/NextAuth-000000?style=for-the-badge&logo=auth0&logoColor=white)
+![API Routes](https://img.shields.io/badge/API_Routes-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
 
-**Authentication:** RBAC, session-based auth, secure credential flow
+**Database**
+
+![PostgreSQL](https://img.shields.io/badge/Neon_PostgreSQL-00E5BF?style=for-the-badge&logo=postgresql&logoColor=black)
+
+**Deployment**
+
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
