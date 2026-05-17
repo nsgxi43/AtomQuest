@@ -11,6 +11,7 @@ import {
   LogOut,
   BarChart3,
   Share2,
+  Activity,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "../ui/Button";
@@ -62,6 +63,12 @@ export function Sidebar() {
       href: "/reports",
       label: "Reports",
       icon: BarChart3,
+      roles: ["MANAGER", "ADMIN"],
+    },
+    {
+      href: "/analytics",
+      label: "Analytics",
+      icon: Activity,
       roles: ["MANAGER", "ADMIN"],
     },
   ];
