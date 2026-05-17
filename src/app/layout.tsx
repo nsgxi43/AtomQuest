@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/lib/auth";
 import SessionWrapper from "@/components/SessionWrapper";
-import { DemoSwitcher } from "@/components/DemoSwitcher";
 import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
@@ -34,7 +33,6 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <SessionWrapper>
           {children}
-          <DemoSwitcher />
         </SessionWrapper>
         <Toaster position="top-center" toastOptions={{ duration: 4000, style: { background: '#333', color: '#fff' } }} />
       </body>
