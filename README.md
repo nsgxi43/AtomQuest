@@ -144,6 +144,19 @@ DRAFT ──► SUBMITTED ──► APPROVED ──► LOCKED
 Each transition is timestamped (`submittedAt`, `approvedAt`, `lockedAt`) and logged to the audit system.
 
 ---
+## Goal Governance Constraints
+
+AtomQuest enforces enterprise KPI governance constraints including:
+
+- Minimum 10% weightage per goal
+- Maximum 8 goals per goal sheet
+- Structured quarterly validation
+- KPI normalization rules
+- Goal distribution consistency checks
+
+These validations ensure balanced employee performance measurement and governance compliance.
+
+---
 
 ## Goal Mathematics
 
@@ -190,10 +203,32 @@ All goals within a single goal sheet must satisfy:
 Any deviation is detected by the escalation engine (Rule ESC-RULE-004) and surfaced as a data integrity violation that blocks submission.
 
 ---
+### Achievement Reporting & Export
 
-## Shared Goals & Collaborative KPIs
+Managers and administrators can generate structured achievement reports for governance review and enterprise performance analysis.
 
-AtomQuest supports the enterprise pattern of **shared KPI ownership** — where a single organizational target spans multiple employees or teams.
+Supported export workflows include:
+
+- CSV export
+- Excel-compatible reporting
+- Quarterly KPI summaries
+- Goal achievement tracking
+- Department-level performance analysis
+  
+---
+
+## Shared Goal Synchronization Engine
+
+Shared goals support a primary KPI owner model where progress and achievement updates automatically propagate across all linked employee goal sheets.
+
+This enables:
+
+- Cross-functional KPI ownership
+- Organization-wide objective alignment
+- Real-time synchronization of shared achievements
+- Consistent governance tracking across departments
+
+---
 
 ### Data Architecture
 
@@ -358,6 +393,19 @@ Implemented enterprise governance safeguards including:
 - SLA monitoring
 - Risk state computation
 - Governance health scoring
+
+---
+
+## Enterprise SSO Architecture Simulation
+
+AtomQuest includes architecture-ready enterprise authentication design modeled around Microsoft Entra ID / Azure AD role-based organizational access patterns.
+
+The RBAC and session architecture were designed to support future enterprise SSO integration workflows including:
+
+- Organizational identity providers
+- Centralized access governance
+- Enterprise session management
+- Role-aware authentication pipelines
 
 ---
 ## Advanced RBAC Security Model
