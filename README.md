@@ -61,39 +61,8 @@ The platform is seeded with realistic organizational data — two managers, six 
 
 ## System Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         AtomQuest Platform                       │
-│                                                                   │
-│  ┌──────────────┐   ┌──────────────┐   ┌──────────────────────┐ │
-│  │  Employee    │   │   Manager    │   │       Admin           │ │
-│  │  Dashboard   │   │  Dashboard   │   │     Dashboard         │ │
-│  │              │   │              │   │                       │ │
-│  │ • Goal Sheet │   │ • Approval   │   │ • Org Overview        │ │
-│  │ • Q Updates  │   │   Queue      │   │ • Escalation Engine   │ │
-│  │ • Progress   │   │ • Team KPIs  │   │ • Audit Logs          │ │
-│  │ • Shared     │   │ • Escalations│   │ • User Directory      │ │
-│  │   Goals      │   │ • Check-ins  │   │ • Compliance Score    │ │
-│  └──────┬───────┘   └──────┬───────┘   └──────────┬────────── ┘ │
-│         │                  │                        │             │
-│  ┌──────▼──────────────────▼────────────────────── ▼───────────┐ │
-│  │                  Next.js App Router (v16)                    │ │
-│  │              Server Components · API Routes                  │ │
-│  │              NextAuth Session · RBAC Middleware              │ │
-│  └────────────────────────┬────────────────────────────────────┘ │
-│                           │                                       │
-│  ┌────────────────────────▼────────────────────────────────────┐ │
-│  │                    Prisma ORM Layer                          │ │
-│  │         Type-safe queries · Migration management            │ │
-│  └────────────────────────┬────────────────────────────────────┘ │
-│                           │                                       │
-│  ┌────────────────────────▼────────────────────────────────────┐ │
-│  │               Neon PostgreSQL (Serverless)                   │ │
-│  │    Users · GoalSheets · Goals · QuarterlyUpdates           │ │
-│  │    SharedGoals · CheckinComments · AuditLogs               │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-```
+![Uploading systemarc.png…]()
+
 
 ---
 
@@ -123,59 +92,6 @@ AuditLog        (changedBy → entityType + entityId + oldValue + newValue)
 - `AuditLog` stores old/new values as strings for schema-agnostic traceability across any entity type
 
 ---
-
-## Repository Structure
-
-```
-atomquest/
-├── prisma/
-│   ├── schema.prisma          # Full data model
-│   ├── seed.ts                # Enterprise-grade seed with org hierarchy
-│   └── migrations/            # Full migration history
-│
-├── src/
-│   ├── middleware.ts           # Route protection via session cookie check
-│   ├── app/
-│   │   ├── (auth)/            # Login page, auth layout
-│   │   ├── (dashboard)/
-│   │   │   ├── employee/      # Employee goal sheet & quarterly views
-│   │   │   ├── manager/       # Approval queue, team KPI views
-│   │   │   ├── admin/         # Org-wide governance, audit, escalations
-│   │   │   ├── analytics/     # Cross-role analytics dashboard
-│   │   │   ├── reports/       # Quarter-wise KPI reporting
-│   │   │   └── shared-goals/  # Collaborative KPI management
-│   │   └── api/
-│   │       ├── auth/          # NextAuth credentials handler
-│   │       ├── goal-sheets/   # CRUD + status transitions
-│   │       ├── goals/         # Goal management endpoints
-│   │       ├── quarterly-updates/ # Q1–Q4 check-in endpoints
-│   │       ├── shared-goals/  # Shared KPI creation & assignment
-│   │       ├── escalations/   # Rule-based escalation engine
-│   │       ├── audit-logs/    # Audit trail retrieval
-│   │       ├── analytics/     # Aggregated KPI analytics
-│   │       ├── reports/       # Reporting endpoints
-│   │       ├── checkins/      # Manager check-in comments
-│   │       ├── dashboard/     # Dashboard summary endpoints
-│   │       └── users/         # User directory
-│   │
-│   ├── components/
-│   │   ├── DemoSwitcher.tsx   # Floating quarter navigation widget
-│   │   ├── SessionWrapper.tsx # Client-side session provider
-│   │   ├── admin/             # Admin-specific UI components
-│   │   ├── goals/             # Goal form, goal card components
-│   │   ├── manager/           # Approval queue, team view components
-│   │   ├── reports/           # Report rendering components
-│   │   ├── layout/            # Sidebar, nav, shell components
-│   │   └── ui/                # Radix UI primitive wrappers
-│   │
-│   ├── lib/
-│   │   ├── auth.ts            # NextAuth configuration
-│   │   └── prisma.ts          # Prisma singleton client
-│   └── types/                 # Shared TypeScript type definitions
-```
-
----
-
 ## Authentication & RBAC
 
 ### Authentication
@@ -466,39 +382,6 @@ All accounts share the password: **`password123`**
 
 ---
 
-## Recommended Evaluator Walkthrough
-
-### Pass 1 — Admin Governance Overview (5 min)
-
-1. Log in as `admin@demo.com`
-2. Review the admin dashboard — goal sheet pipeline counts, compliance score
-3. Navigate to **Escalations** — observe rule-based escalation records with severity, timeline stages, and SLA breach details
-4. Navigate to **Audit Logs** — review governance traceability records
-5. Navigate to **User Directory** — view org hierarchy
-
-### Pass 2 — Manager Approval Workflow (5 min)
-
-1. Log in as `manager@demo.com`
-2. Review the approval queue — Rahul's draft sheet will show as pending submission
-3. Navigate to **Team KPIs** — view aggregate quarterly performance for direct reports
-4. Navigate to **Escalations** — observe manager-scoped escalation view (only own team)
-
-### Pass 3 — Employee Goal Lifecycle (5 min)
-
-1. Log in as `priya@demo.com`
-2. View goal sheet with locked status and complete Q1–Q4 update history
-3. Navigate to **Shared Goals** — observe any assigned collaborative KPIs
-4. Switch to `rahul@demo.com` — observe draft state, incomplete submission
-
-### Pass 4 — Quarterly Lifecycle Simulation (5 min)
-
-1. Log in as any role
-2. Use the **Demo Mode** floating widget (bottom-right) to switch between Q1, Q2, Q3, Q4
-3. Observe how dashboards, progress indicators, and KPI states respond to the active quarter context
-4. Return widget to **Real Time** to restore live state
-
----
-
 ## Local Development
 
 ### Prerequisites
@@ -530,20 +413,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) and log in with any demo credential.
 
----
 
-## Future Roadmap
-
-| Capability | Description |
-|---|---|
-| **Notification Engine** | Real-time in-app notifications for goal approvals, returns, and escalation triggers |
-| **Goal Revision History** | Full diff-based version history for goal edits, surfaced in audit UI |
-| **Bulk Operations** | Admin batch approval, bulk goal sheet locking for cycle close |
-| **Export & Reporting** | PDF/CSV export of quarterly performance reports per employee |
-| **Real SSO Integration** | OIDC/SAML integration replacing simulated Entra ID experience |
-| **Performance Calibration** | Bell-curve calibration layer for cross-team normalization |
-| **Mobile-Responsive Shell** | Fully adapted mobile experience for employee self-service |
-| **Webhook Outbound** | Governance event webhooks for HRMS integration |
 
 ---
 
