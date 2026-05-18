@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Check if user is trying to access protected routes
@@ -10,16 +11,30 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/manager") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/reports") ||
-    pathname.startsWith("/shared-goals")
+    pathname.startsWith("/shared-goals") ||
+    pathname.startsWith("/system-health") ||
+    pathname.startsWith("/analytics")
   ) {
-    // Check for auth session in cookies
-    const sessionToken =
-      request.cookies.get("next-auth.session-token")?.value ||
-      request.cookies.get("__Secure-next-auth.session-token")?.value;
+    const token = await getToken({ req: request });
 
     // If no session token, redirect to login
-    if (!sessionToken) {
+    if (!token) {
       return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    const role = token.role as string | undefined;
+
+    // Role-based route protection
+    if (pathname.startsWith("/admin") && role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    if (pathname.startsWith("/manager") && role !== "MANAGER" && role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    if (pathname.startsWith("/employee") && role !== "EMPLOYEE" && role !== "MANAGER" && role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 
@@ -33,5 +48,7 @@ export const config = {
     "/admin/:path*",
     "/reports/:path*",
     "/shared-goals/:path*",
+    "/system-health/:path*",
+    "/analytics/:path*",
   ],
 };
