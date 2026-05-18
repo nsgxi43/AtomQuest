@@ -433,6 +433,60 @@ Notification delivery is optional and designed for evaluator-friendly demonstrat
 
 ---
 
+# AI Governance Intelligence
+
+AtomQuest includes an AI-assisted Governance Intelligence layer powered by Google Gemini to help employees create measurable, governance-aligned KPI structures before submission.
+
+The system evaluates goal quality in real time and provides structured governance feedback including:
+
+- KPI clarity analysis
+- measurable outcome detection
+- governance risk identification
+- ambiguous scope detection
+- target realism evaluation
+- quarterly feasibility assessment
+- actionable KPI improvement recommendations
+
+### AI Governance Workflow
+
+```text
+Employee Creates Goal
+        ↓
+Analyze Governance
+        ↓
+Gemini AI Governance Review
+        ↓
+Governance Score + Risk Analysis
+        ↓
+Employee Refines Goal
+        ↓
+Submit for Manager Approval
+```
+
+### Enterprise AI Review Features
+
+The AI review engine provides:
+
+* Governance score classification
+* Risk-level detection
+* KPI quality assessment
+* Enterprise-style governance recommendations
+* AI-enhanced KPI rewrite suggestions
+* Structured strengths and risk analysis
+
+### Architecture Notes
+
+* Powered using Google Gemini API
+* Server-side protected inference only
+* No client-side API exposure
+* Graceful fallback analysis supported
+* No database schema modifications required
+* AI analysis remains advisory and does not override RBAC or governance approval workflows
+
+The AI layer is intentionally designed as an enterprise governance copilot rather than a chatbot experience, preserving workflow integrity while improving KPI quality and governance consistency.
+
+---
+
 ## Analytics Architecture
 
 The analytics layer aggregates cross-entity governance data into dashboard metrics:
@@ -552,6 +606,17 @@ Implemented enterprise governance safeguards including:
 
 ---
 
+## AI Governance Intelligence Layer
+Implemented an AI-assisted KPI quality review engine including:
+
+- Real-time goal quality scoring
+- Governance risk classification
+- KPI clarity and measurability analysis
+- AI-powered rewrite recommendations
+- Pre-submission governance copilot experience
+
+---
+
 ## Governance Notification Infrastructure
 
 Implemented enterprise workflow communication architecture including:
@@ -640,6 +705,7 @@ Supported Roles:
 | Database | Neon PostgreSQL | Serverless, connection-pooled |
 | ORM | Prisma 6.19 | Type-safe schema + migrations |
 | Auth | NextAuth v4 | Credentials provider, JWT sessions |
+| AI Layer | Google Gemini API | Server-side governance intelligence |
 | Notifications | Nodemailer + Gmail SMTP | Governance workflow delivery |
 | Styling | TailwindCSS v4 | PostCSS pipeline |
 | Forms | React Hook Form + Zod | Runtime schema validation |
@@ -703,10 +769,11 @@ NEXTAUTH_URL=
 
 SMTP_EMAIL=
 SMTP_PASSWORD=
+
+GEMINI_API_KEY=
 ```
 
-Optional:
-Configure SMTP credentials to enable live governance email delivery and workflow notification demonstrations.
+Optional: Configure SMTP credentials to enable live governance email delivery. Configure Gemini API key to enable AI governance intelligence.
 
 ```bash
 # Apply migrations
@@ -731,6 +798,7 @@ Most portfolio projects demonstrate the ability to build forms and query a datab
 - **Role isolation at the data layer** — RBAC is not a UI concern; it is enforced in every API route via server-side session validation and Prisma query scoping
 - **Escalation intelligence** — four distinct compliance rules with configurable thresholds, multi-stage timeline construction, risk scoring, and a composite organizational compliance metric
 - **Audit-first design** — every significant state transition is persisted with old/new value tracking for forensic governance traceability
+- **AI governance copilot** — pre-submission KPI quality review powered by Gemini, surfacing governance risks before they reach the manager approval queue
 - **Production deployment** — live on Vercel with Neon serverless PostgreSQL; not a localhost demo
 - **Enterprise data fidelity** — seeded with a realistic org hierarchy, multi-department employee distribution, and complete quarterly update histories
 - **Enterprise workflow communication** — governance-triggered notification delivery, SMTP integration, notification persistence, and workflow-linked escalation alerts
@@ -751,6 +819,7 @@ The system models:
 - RBAC-governed workflow routing
 - quarterly governance enforcement
 - escalation intelligence
+- AI-assisted KPI quality review
 - notification delivery architecture
 - manager-reporting hierarchy
 - audit traceability
@@ -761,6 +830,7 @@ The platform combines:
 - seeded enterprise simulation
 - real workflow persistence
 - live SMTP notification delivery
+- AI governance intelligence
 - enterprise-style onboarding
 - role-aware governance lifecycle enforcement
 
