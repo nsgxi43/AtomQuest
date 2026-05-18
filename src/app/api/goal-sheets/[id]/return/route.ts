@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { dispatchNotification } from "@/lib/notifications";
 
 export async function POST(
   request: NextRequest,
@@ -61,6 +62,18 @@ export async function POST(
         newValue: "RETURNED",
       },
     });
+
+    // Fire governance notification
+    dispatchNotification({
+      toUserId:   updated.employee.id,
+      type:       "GOAL_RETURNED",
+      title:      "Your goal sheet has been returned for revision",
+      message:    `Your manager has returned your goal sheet for revision.${comment ? ` Comment: "${comment}"` : ""} Please review and resubmit.`,
+      entityType: "GoalSheet",
+      entityId:   id,
+      ctaLabel:   "Review & Resubmit",
+      ctaUrl:     "/employee",
+    }).catch(() => {});
 
     return NextResponse.json(updated);
   } catch (error: any) {

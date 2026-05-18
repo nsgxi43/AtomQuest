@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Goal, GoalSheet } from "@/types";
+import { NotificationEmailCard } from "@/components/NotificationEmailCard";
 
 export default function EmployeeGoalPage() {
   const { data: session } = useSession();
@@ -158,6 +159,9 @@ export default function EmployeeGoalPage() {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Live Notification Card — visible to all employees */}
+      <NotificationEmailCard />
+
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Goals</h1>

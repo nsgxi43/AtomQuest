@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginSchema, LoginInput } from "@/lib/validations";
+import Link from "next/link";
 import {
   AlertCircle, X, ChevronRight, Loader2,
   Shield, Users, CheckCircle2, Lock,
@@ -496,6 +497,11 @@ export default function LoginPage() {
               </p>
               <p className="text-center text-gray-300 text-[10px] mt-1">
                 SSO architecture inspired by Microsoft Entra ID workflows · Simulated
+              </p>
+              <p className="text-center mt-3">
+                <Link href="/register" className="text-indigo-500 text-xs font-medium hover:text-indigo-700 transition-colors">
+                  New to AtomQuest? Create an account →
+                </Link>
               </p>
             </div>
           </div>

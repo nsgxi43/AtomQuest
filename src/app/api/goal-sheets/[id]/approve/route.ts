@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { dispatchNotification } from "@/lib/notifications";
 
 export async function POST(
   request: NextRequest,
@@ -48,6 +49,18 @@ export async function POST(
         newValue: "LOCKED",
       },
     });
+
+    // Fire governance notification (fire-and-forget)
+    dispatchNotification({
+      toUserId:   updated.employee.id,
+      type:       "GOAL_APPROVED",
+      title:      "Your goal sheet has been approved",
+      message:    `Your FY ${updated.cycleYear} goal sheet has been approved and locked by your manager. Quarterly tracking is now active.`,
+      entityType: "GoalSheet",
+      entityId:   id,
+      ctaLabel:   "View Goal Sheet",
+      ctaUrl:     "/employee",
+    }).catch(() => {});
 
     return NextResponse.json(updated);
   } catch (error: any) {

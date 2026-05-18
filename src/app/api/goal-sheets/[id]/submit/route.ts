@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { dispatchNotification } from "@/lib/notifications";
 
 export async function POST(
   request: NextRequest,
@@ -16,7 +17,7 @@ export async function POST(
 
     const goalSheet = await prisma.goalSheet.findUnique({
       where: { id },
-      include: { goals: true, employee: true },
+      include: { goals: true, employee: { include: { manager: true } } },
     });
 
     if (!goalSheet) {
@@ -68,6 +69,21 @@ export async function POST(
         newValue: "SUBMITTED",
       },
     });
+
+    // Notify manager if exists
+    const manager = (goalSheet.employee as any).manager;
+    if (manager?.id) {
+      dispatchNotification({
+        toUserId:   manager.id,
+        type:       "GOAL_SUBMITTED",
+        title:      `${goalSheet.employee.name} submitted their goal sheet`,
+        message:    `${goalSheet.employee.name} has submitted their FY ${goalSheet.cycleYear} goal sheet for your review and approval.`,
+        entityType: "GoalSheet",
+        entityId:   id,
+        ctaLabel:   "Review Goal Sheet",
+        ctaUrl:     "/manager",
+      }).catch(() => {});
+    }
 
     return NextResponse.json(updated);
   } catch (error: any) {

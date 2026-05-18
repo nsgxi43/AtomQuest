@@ -13,6 +13,7 @@ import {
   Share2,
   Activity,
   ShieldAlert,
+  HeartPulse,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "../ui/Button";
@@ -77,6 +78,12 @@ export function Sidebar() {
       label: "Analytics",
       icon: Activity,
       roles: ["MANAGER", "ADMIN"],
+    },
+    {
+      href: "/system-health",
+      label: "System Health",
+      icon: HeartPulse,
+      roles: ["ADMIN"],
     },
   ];
 

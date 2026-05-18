@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { Badge } from "../ui/Badge";
+import { NotificationCenter } from "../NotificationCenter";
 
 export function TopBar() {
   const { data: session } = useSession();
@@ -26,9 +27,12 @@ export function TopBar() {
           <p className="text-sm text-gray-600">{user?.email}</p>
         </div>
       </div>
-      <Badge variant={roleColors[user?.role] || "draft"}>
-        {user?.role}
-      </Badge>
+      <div className="flex items-center gap-3">
+        <NotificationCenter />
+        <Badge variant={roleColors[user?.role] || "draft"}>
+          {user?.role}
+        </Badge>
+      </div>
     </div>
   );
 }

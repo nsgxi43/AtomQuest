@@ -47,3 +47,17 @@ export const LoginSchema = z.object({
 });
 
 export type LoginInput = z.infer<typeof LoginSchema>;
+
+export const RegisterSchema = z.object({
+  name:              z.string().min(2, "Full name must be at least 2 characters"),
+  email:             z.string().email("Invalid email address"),
+  password:          z.string().min(8, "Password must be at least 8 characters"),
+  role:              z.enum(["EMPLOYEE", "MANAGER"]),
+  employeeId:        z.string().min(1, "Employee ID is required").max(20),
+  department:        z.string().min(1, "Department is required"),
+  organization:      z.string().optional(),
+  managerId:         z.string().optional(),
+  notificationEmail: z.string().email("Invalid notification email").optional().or(z.literal("")),
+});
+
+export type RegisterInput = z.infer<typeof RegisterSchema>;

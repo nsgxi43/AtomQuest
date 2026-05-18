@@ -43,23 +43,67 @@ enum UpdateStatus {
   AT_RISK
 }
 
+enum NotificationType {
+  GOAL_SUBMITTED
+  GOAL_APPROVED
+  GOAL_RETURNED
+  QUARTERLY_REMINDER
+  ESCALATION_TRIGGERED
+  SHARED_GOAL_UPDATED
+  CHECKIN_REQUESTED
+  SYSTEM_ALERT
+}
+
 model User {
-  id            String   @id @default(cuid())
-  name          String
-  email         String   @unique
-  password      String
-  role          Role     @default(EMPLOYEE)
-  managerId     String?
-  manager       User?    @relation("ManagerEmployee", fields: [managerId], references: [id])
-  subordinates  User[]   @relation("ManagerEmployee")
-  goalSheets    GoalSheet[]
-  checkins      CheckinComment[]
-  auditLogs     AuditLog[]
-  sharedGoals   SharedGoal[]
+  id                  String   @id @default(cuid())
+  name                String
+  email               String   @unique
+  password            String
+  role                Role     @default(EMPLOYEE)
+  managerId           String?
+  notificationEmail   String?
+  employeeId          String?  @unique
+  department          String?
+  organization        String?
+  manager             User?    @relation("ManagerEmployee", fields: [managerId], references: [id])
+  subordinates        User[]   @relation("ManagerEmployee")
+  goalSheets          GoalSheet[]
+  checkins            CheckinComment[]
+  auditLogs           AuditLog[]
+  sharedGoals         SharedGoal[]
   primaryOwnedSharedGoals SharedGoal[] @relation("PrimaryOwner")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  notifications       Notification[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
   @@map("users")
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id])
+  type        NotificationType
+  title       String
+  message     String
+  entityType  String?
+  entityId    String?
+  isRead      Boolean          @default(false)
+  emailSent   Boolean          @default(false)
+  emailTo     String?
+  createdAt   DateTime         @default(now())
+  @@map("notifications")
+}
+
+model NotificationLog {
+  id          String   @id @default(cuid())
+  toEmail     String
+  subject     String
+  eventType   String
+  entityId    String?
+  status      String   @default("SENT")
+  error       String?
+  sentAt      DateTime @default(now())
+  @@map("notification_logs")
 }
 
 model GoalSheet {
