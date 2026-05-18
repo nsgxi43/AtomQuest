@@ -844,4 +844,38 @@ to create a deployable, architecture-oriented governance platform experience rat
 
 [Live Platform →](https://atom-quest-lake.vercel.app)
 
+---
+
+## Platform Screenshots
+
+### Login & Onboarding
+| | |
+|---|---|
+| ![](./demo_pic/Screenshot%202026-05-19%20at%2012.31.14%20AM.png) | ![](./demo_pic/Screenshot%202026-05-19%20at%2012.31.28%20AM.png) |
+| ![](./demo_pic/Screenshot%202026-05-19%20at%2012.31.48%20AM.png) | ![](./demo_pic/Screenshot%202026-05-19%20at%2012.32.24%20AM.png) |
+
+### Employee Dashboard & Goal Management
+| | |
+|---|---|
+| ![](./demo_pic/Screenshot%202026-05-19%20at%2012.32.45%20AM.png) | ![](./demo_pic/Screenshot%202026-05-19%20at%2012.33.03%20AM.png) |
+| ![](./demo_pic/Screenshot%202026-05-19%20at%2012.33.16%20AM.png) | ![](./demo_pic/Screenshot%202026-05-19%20at%2012.33.29%20AM.png) |
+
+### Manager Dashboard & Approvals
+| | |
+|---|---|
+| ![](./demo_pic/Screenshot%202026-05-19%20at%2012.33.48%20AM.png) | ![](./demo_pic/Screenshot%202026-05-19%20at%2012.34.07%20AM.png) |
+| ![](./demo_pic/Screenshot%202026-05-19%20at%2012.34.51%20AM.png) | ![](./demo_pic/Screenshot%202026-05-19%20at%2012.35.02%20AM.png) |
+
+### Quarterly Tracking & Analytics
+| | |
+|---|---|
+| ![](./demo_pic/Screenshot%202026-05-19%20at%2012.35.20%20AM.png) | ![](./demo_pic/Screenshot%202026-05-19%20at%2012.35.29%20AM.png) |
+| ![](./demo_pic/Screenshot%202026-05-19%20at%2012.35.43%20AM.png) | ![](./demo_pic/Screenshot%202026-05-19%20at%2012.35.56%20AM.png) |
+
+### Escalation Engine & Admin
+| | |
+|---|---|
+| ![](./demo_pic/Screenshot%202026-05-19%20at%2012.36.06%20AM.png) | ![](./demo_pic/Screenshot%202026-05-19%20at%2012.36.18%20AM.png) |
+| ![](./demo_pic/Screenshot%202026-05-19%20at%2012.36.29%20AM.png) | ![](./demo_pic/Screenshot%202026-05-19%20at%2012.36.42%20AM.png) |
+
 </div>
