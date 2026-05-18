@@ -4,7 +4,7 @@
 
 ### Enterprise KPI Governance & Performance Intelligence Platform
 
-*Quarterly performance lifecycle · Goal sheet management · RBAC governance · Escalation intelligence · Audit traceability*
+*Enterprise onboarding · KPI governance · Quarterly lifecycle management · Notification intelligence · Escalation workflows · Audit traceability*
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-atom--quest--lake.vercel.app-6366f1?style=for-the-badge&logo=vercel&logoColor=white)](https://atom-quest-lake.vercel.app)
 [![Next.js](https://img.shields.io/badge/Next.js-16.2.6-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
@@ -20,7 +20,7 @@
 
 AtomQuest is a **production-deployed enterprise governance platform** that simulates how modern organizations manage KPI performance, quarterly review cycles, organizational accountability, and governance compliance — all through a structured, role-governed system.
 
-It is not a CRUD demonstration. AtomQuest models the actual operational mechanics of **enterprise performance management**: goal submission lifecycles, manager approval workflows, quarterly check-in tracking, shared KPI ownership, escalation SLA enforcement, audit tracing, and organization-wide compliance scoring.
+It is not a CRUD demonstration. AtomQuest models the actual operational mechanics of **enterprise performance management**: goal submission lifecycles, enterprise onboarding workflows, manager approval workflows, governance notification delivery, quarterly check-in tracking, shared KPI ownership, escalation SLA enforcement, audit tracing, and organization-wide compliance scoring.
 
 > **The core thesis:** Performance accountability without governance infrastructure degrades into noise. AtomQuest operationalizes the governance layer — making KPI ownership, review cadence, and accountability visible, auditable, and enforceable.
 
@@ -63,7 +63,6 @@ The platform is seeded with realistic organizational data — two managers, six 
 
 ![System Architecture](./systemarc.png)
 
-
 ---
 
 ## Database Schema Design
@@ -92,6 +91,7 @@ AuditLog        (changedBy → entityType + entityId + oldValue + newValue)
 - `AuditLog` stores old/new values as strings for schema-agnostic traceability across any entity type
 
 ---
+
 ## Authentication & RBAC
 
 ### Authentication
@@ -116,6 +116,58 @@ ADMIN     →  Organization-wide visibility.
 ```
 
 Role enforcement is applied at the API layer, not just UI. Every API route validates `session.user.role` before returning data, and manager-scoped routes automatically filter by `managerId` from the session — not from query parameters.
+
+---
+
+# Enterprise Registration & Identity Onboarding
+
+AtomQuest supports enterprise-style onboarding workflows that allow employees and managers to self-register into the governance system while preserving RBAC isolation and organizational hierarchy mapping.
+
+### Supported Registration Flows
+
+- Employee onboarding
+- Manager onboarding
+- Department assignment
+- Organization / tenant mapping
+- Reporting manager assignment
+- Optional governance notification enrollment
+
+### Registration Architecture
+
+```text
+Employee
+   ↓
+Select Reporting Manager
+   ↓
+RBAC Role Assignment
+   ↓
+Governance Workspace Creation
+   ↓
+Goal Lifecycle Initialization
+```
+
+### Identity Model
+
+Each user may contain:
+
+```text
+- employeeId
+- department
+- organization
+- reportingManager
+- notificationEmail
+```
+
+This enables realistic enterprise organizational simulation without requiring external identity providers.
+
+### Security Model
+
+* Passwords hashed using bcrypt
+* Role-aware onboarding validation
+* Unique employee ID enforcement
+* Server-side registration validation using Zod
+* Prisma-backed persistence layer
+* RBAC-aware session initialization
 
 ---
 
@@ -144,6 +196,7 @@ DRAFT ──► SUBMITTED ──► APPROVED ──► LOCKED
 Each transition is timestamped (`submittedAt`, `approvedAt`, `lockedAt`) and logged to the audit system.
 
 ---
+
 ## Goal Governance Constraints
 
 AtomQuest enforces enterprise KPI governance constraints including:
@@ -203,6 +256,7 @@ All goals within a single goal sheet must satisfy:
 Any deviation is detected by the escalation engine (Rule ESC-RULE-004) and surfaced as a data integrity violation that blocks submission.
 
 ---
+
 ### Achievement Reporting & Export
 
 Managers and administrators can generate structured achievement reports for governance review and enterprise performance analysis.
@@ -214,7 +268,7 @@ Supported export workflows include:
 - Quarterly KPI summaries
 - Goal achievement tracking
 - Department-level performance analysis
-  
+
 ---
 
 ## Shared Goal Synchronization Engine
@@ -314,6 +368,71 @@ Each escalation record includes:
 
 ---
 
+# Governance Notification Engine
+
+AtomQuest includes a centralized governance notification engine designed to simulate enterprise workflow communication systems.
+
+The notification system supports both:
+
+- in-platform governance notifications
+- optional real email delivery via SMTP
+
+### Supported Notification Events
+
+| Event | Recipient |
+|---|---|
+| Goal submitted | Reporting manager |
+| Goal approved | Employee |
+| Goal returned | Employee |
+| Escalation triggered | Manager / Admin |
+| Quarterly reminder | Employee |
+
+### Delivery Channels
+
+```text
+In-App Notification Center
+SMTP Email Delivery
+Teams-Style Governance Cards
+```
+
+### Notification Architecture
+
+```text
+Workflow Event
+      ↓
+Notification Dispatcher
+      ↓
+Notification Database Log
+      ↓
+SMTP Delivery (optional)
+      ↓
+Governance Notification Center
+```
+
+### Enterprise Notification Features
+
+* delivery timestamps
+* notification history
+* unread indicators
+* governance activity feed
+* workflow-linked deep navigation
+* notification audit persistence
+* manager escalation routing
+* organization-aware notification delivery
+
+### SMTP Infrastructure
+
+AtomQuest uses:
+
+* Nodemailer
+* Gmail App Password SMTP
+* HTML enterprise email templates
+* workflow-triggered notification dispatching
+
+Notification delivery is optional and designed for evaluator-friendly demonstrations without requiring enterprise mail infrastructure.
+
+---
+
 ## Analytics Architecture
 
 The analytics layer aggregates cross-entity governance data into dashboard metrics:
@@ -372,6 +491,43 @@ The floating `DemoSwitcher` widget is an **evaluator assistance utility** — no
 This design means an evaluator logged in as `manager@demo.com` can traverse Q1 through Q4 lifecycle states while remaining under the Manager RBAC scope throughout.
 
 ---
+
+# Teams-Style Governance Cards
+
+AtomQuest includes Teams-inspired governance workflow cards that simulate enterprise collaboration and approval workflows.
+
+These cards provide:
+
+- workflow summaries
+- approval status visibility
+- escalation indicators
+- governance action shortcuts
+- deep-link navigation into review workflows
+
+### Example Governance Actions
+
+```text
+Rahul Verma submitted Q2 Goals
+
+[Review Goal Sheet]
+[Approve]
+[Request Changes]
+```
+
+### Purpose
+
+This is a simulation of enterprise collaboration architecture inspired by Microsoft Teams adaptive workflow patterns.
+
+It is intentionally positioned as:
+
+* Teams-style
+* architecture-ready
+* enterprise-modeled
+
+and does not claim direct Microsoft Teams webhook integration.
+
+---
+
 # Bonus / Advanced Implementations
 
 ## Real-Time KPI Analytics Engine
@@ -396,6 +552,21 @@ Implemented enterprise governance safeguards including:
 
 ---
 
+## Governance Notification Infrastructure
+
+Implemented enterprise workflow communication architecture including:
+
+- SMTP-based notification delivery
+- in-app notification center
+- workflow-triggered governance alerts
+- escalation notifications
+- approval/review delivery system
+- notification persistence and auditability
+- manager-linked escalation routing
+- live evaluator email enrollment
+
+---
+
 ## Enterprise SSO Architecture Simulation
 
 AtomQuest includes architecture-ready enterprise authentication design modeled around Microsoft Entra ID / Azure AD role-based organizational access patterns.
@@ -408,6 +579,42 @@ The RBAC and session architecture were designed to support future enterprise SSO
 - Role-aware authentication pipelines
 
 ---
+
+# Live Governance Notification Enrollment
+
+Seeded demo users can optionally attach a temporary real-world email address during evaluation sessions.
+
+This enables:
+
+- live SMTP notification delivery
+- workflow email demonstrations
+- governance escalation simulation
+- approval and review notification testing
+
+Importantly:
+
+- seeded demo authentication remains unchanged
+- no OTP or verification flows are required
+- notification emails are stored separately from login identity
+
+This preserves evaluator simplicity while enabling realistic enterprise workflow demonstrations.
+
+### Demo Notification Workflow
+
+```text
+Seeded Demo User
+        ↓
+Enter Temporary Notification Email
+        ↓
+Workflow Event Triggered
+        ↓
+SMTP Notification Delivered
+```
+
+This architecture allows hackathon evaluators and reviewers to experience real governance workflows without affecting demo authentication simplicity.
+
+---
+
 ## Advanced RBAC Security Model
 Implemented secure enterprise-grade access control using:
 
@@ -433,6 +640,7 @@ Supported Roles:
 | Database | Neon PostgreSQL | Serverless, connection-pooled |
 | ORM | Prisma 6.19 | Type-safe schema + migrations |
 | Auth | NextAuth v4 | Credentials provider, JWT sessions |
+| Notifications | Nodemailer + Gmail SMTP | Governance workflow delivery |
 | Styling | TailwindCSS v4 | PostCSS pipeline |
 | Forms | React Hook Form + Zod | Runtime schema validation |
 | Charts | Recharts | Quarterly analytics visualization |
@@ -486,8 +694,21 @@ npm install
 
 # Configure environment
 cp .env.example .env.local
-# Set DATABASE_URL and NEXTAUTH_SECRET in .env.local
+```
 
+```env
+DATABASE_URL=
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=
+
+SMTP_EMAIL=
+SMTP_PASSWORD=
+```
+
+Optional:
+Configure SMTP credentials to enable live governance email delivery and workflow notification demonstrations.
+
+```bash
 # Apply migrations
 npx prisma migrate deploy
 
@@ -499,8 +720,6 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) and log in with any demo credential.
-
-
 
 ---
 
@@ -514,8 +733,38 @@ Most portfolio projects demonstrate the ability to build forms and query a datab
 - **Audit-first design** — every significant state transition is persisted with old/new value tracking for forensic governance traceability
 - **Production deployment** — live on Vercel with Neon serverless PostgreSQL; not a localhost demo
 - **Enterprise data fidelity** — seeded with a realistic org hierarchy, multi-department employee distribution, and complete quarterly update histories
+- **Enterprise workflow communication** — governance-triggered notification delivery, SMTP integration, notification persistence, and workflow-linked escalation alerts
+- **Living organizational architecture** — self-registration, reporting-manager mapping, and organization-aware onboarding flows simulate real enterprise identity structure
+- **Evaluator-ready workflow simulation** — seeded demo accounts combined with optional live notification enrollment allow real enterprise workflow demonstrations without complex onboarding friction
 
 AtomQuest is built for the evaluator who asks: *"Can this engineer design systems, not just write code?"*
+
+---
+
+# Enterprise Workflow Simulation Capabilities
+
+AtomQuest is intentionally designed as a realistic enterprise governance simulation platform.
+
+The system models:
+
+- organizational onboarding
+- RBAC-governed workflow routing
+- quarterly governance enforcement
+- escalation intelligence
+- notification delivery architecture
+- manager-reporting hierarchy
+- audit traceability
+- governance compliance scoring
+
+The platform combines:
+
+- seeded enterprise simulation
+- real workflow persistence
+- live SMTP notification delivery
+- enterprise-style onboarding
+- role-aware governance lifecycle enforcement
+
+to create a deployable, architecture-oriented governance platform experience rather than a static dashboard demonstration.
 
 ---
 
