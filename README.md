@@ -838,13 +838,6 @@ to create a deployable, architecture-oriented governance platform experience rat
 
 ---
 
-<div align="center">
-
-**Built with precision. Deployed with intent.**
-
-[Live Platform →](https://atom-quest-lake.vercel.app)
-
----
 ## Platform Screenshots
 
 ![](./demo_pic/Screenshot_2026-05-19_at_12.31.14_AM.png)
@@ -867,6 +860,15 @@ to create a deployable, architecture-oriented governance platform experience rat
 ![](./demo_pic/Screenshot_2026-05-19_at_12.36.18_AM.png)
 ![](./demo_pic/Screenshot_2026-05-19_at_12.36.29_AM.png)
 ![](./demo_pic/Screenshot_2026-05-19_at_12.36.42_AM.png)
+
+<div align="center">
+
+**Built with precision. Deployed with intent.**
+
+[Live Platform →](https://atom-quest-lake.vercel.app)
+
+---
+
 
 </div>
 
