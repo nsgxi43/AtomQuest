@@ -849,69 +849,29 @@ to create a deployable, architecture-oriented governance platform experience rat
 ---
 </div>
 
+
 ## Platform Screenshots
 
-<div align="center">
-
-### Login & Onboarding
-<table>
-<tr>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.31.14 AM.png" width="480"/></td>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.31.28 AM.png" width="480"/></td>
-</tr>
-<tr>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.31.48 AM.png" width="480"/></td>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.32.24 AM.png" width="480"/></td>
-</tr>
-</table>
-
-### Employee Dashboard & Goal Management
-<table>
-<tr>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.32.45 AM.png" width="480"/></td>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.33.03 AM.png" width="480"/></td>
-</tr>
-<tr>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.33.16 AM.png" width="480"/></td>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.33.29 AM.png" width="480"/></td>
-</tr>
-</table>
-
-### Manager Dashboard & Approvals
-<table>
-<tr>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.33.48 AM.png" width="480"/></td>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.34.07 AM.png" width="480"/></td>
-</tr>
-<tr>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.34.51 AM.png" width="480"/></td>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.35.02 AM.png" width="480"/></td>
-</tr>
-</table>
-
-### Quarterly Tracking & Analytics
-<table>
-<tr>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.35.20 AM.png" width="480"/></td>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.35.29 AM.png" width="480"/></td>
-</tr>
-<tr>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.35.43 AM.png" width="480"/></td>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.35.56 AM.png" width="480"/></td>
-</tr>
-</table>
-
-### Escalation Engine & Admin
-<table>
-<tr>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.36.06 AM.png" width="480"/></td>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.36.18 AM.png" width="480"/></td>
-</tr>
-<tr>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.36.29 AM.png" width="480"/></td>
-<td><img src="./demo_pic/Screenshot 2026-05-19 at 12.36.42 AM.png" width="480"/></td>
-</tr>
-</table>
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.31.14%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.31.28%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.31.48%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.32.24%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.32.45%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.33.03%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.33.16%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.33.29%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.33.48%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.34.07%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.34.51%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.35.02%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.35.20%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.35.29%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.35.43%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.35.56%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.36.06%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.36.18%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.36.29%20AM.png)
+![](./demo_pic/Screenshot%202026-05-19%20at%2012.36.42%20AM.png)
 
 </div>
 
