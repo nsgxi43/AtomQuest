@@ -838,29 +838,6 @@ to create a deployable, architecture-oriented governance platform experience rat
 
 ---
 
-## Platform Screenshots
-
-![](./demo_pic/Screenshot_2026-05-19_at_12.31.14_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.31.28_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.31.48_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.32.24_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.32.45_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.33.03_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.33.16_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.33.29_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.33.48_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.34.07_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.34.51_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.35.02_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.35.20_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.35.29_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.35.43_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.35.56_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.36.06_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.36.18_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.36.29_AM.png)
-![](./demo_pic/Screenshot_2026-05-19_at_12.36.42_AM.png)
-
 <div align="center">
 
 **Built with precision. Deployed with intent.**
